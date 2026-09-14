@@ -1,0 +1,63 @@
+import type { Metadata, Viewport } from "next";
+import { ThemeProvider } from "next-themes";
+import "./globals.css";
+import { ToastProvider } from "@/components/providers/ToastProvider";
+import { ConfirmProvider } from "@/components/providers/ConfirmProvider";
+import { SITE } from "@/lib/config";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: { default: SITE.title, template: `%s · ${SITE.name}` },
+  description: SITE.description,
+  keywords: ["wishlist", "shopee", "tiktok shop", "danh sách mua sắm", "listcuathaovy"],
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: "/",
+    siteName: SITE.name,
+    title: SITE.title,
+    description: SITE.motto,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: SITE.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE.title,
+    description: SITE.tagline,
+    images: ["/og.png"],
+  },
+  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#EFF8F7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A1A20" },
+  ],
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="vi" suppressHydrationWarning>
+      <head>
+        {/* Be Vietnam Pro — tối ưu dấu tiếng Việt; offline build vẫn chạy,
+            fallback system-ui đã khai báo trong tailwind.config. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+        />
+      </head>
+      <body className="min-h-dvh bg-bg font-sans text-ink antialiased">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ToastProvider>
+            <ConfirmProvider>{children}</ConfirmProvider>
+          </ToastProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

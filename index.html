@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ProjectThaoVy — Lưu những món đồ bạn muốn mua</title>
+<meta name="description" content="ProjectThaoVy — kho lưu trữ những món đồ bạn muốn mua. Dán link Shopee, TikTok Shop, lưu lại và mua khi cần." />
+<meta name="theme-color" content="#F7FBFC" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23E6FBFA'/%3E%3Cpath d='M22 26v-3a10 10 0 0 1 20 0v3' fill='none' stroke='%230D9488' stroke-width='4' stroke-linecap='round'/%3E%3Crect x='17' y='26' width='30' height='24' rx='8' fill='%2397FFFF'/%3E%3Cpath d='M32 44c-4-3.6-7-6-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 39 35c0 3-3 5.4-7 9z' fill='%23FB72A8'/%3E%3C/svg%3E" />
+<meta property="og:title" content="ProjectThaoVy — Lưu những món đồ bạn muốn mua" />
+<meta property="og:description" content="Thấy thích thì lưu lại, cần thì mua." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════ LANDING ══════════════════════════════ -->
+<div id="landing" class="view">
+  <header class="lnav">
+    <div class="lnav-in">
+      <a class="brand" href="#/landing">
+        <span class="brand-mark" id="brandMark1"></span>
+        <span class="brand-txt"><b>List</b>cuaThaoVy</span>
+      </a>
+      <nav class="lnav-links">
+        <a href="#how">Cách hoạt động</a>
+        <a href="#why">Vì sao</a>
+      </nav>
+      <div class="lnav-cta">
+        <button class="btn btn-ghost" data-open="auth">Đăng nhập</button>
+        <button class="btn btn-primary" id="landStart">Bắt đầu sử dụng →</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+      <div class="hero-blob hero-blob-3"></div>
+      <div class="hero-in">
+        <div class="hero-copy">
+          <span class="hero-badge"><i id="icoSparkHero"></i> Wishlist cá nhân · Không bán hàng · Không quảng cáo</span>
+          <h1 class="hero-h1">Lưu những điều<br /><span class="grad">bạn muốn mua.</span></h1>
+          <p class="hero-p">Dán link sản phẩm từ Shopee, TikTok Shop hoặc các sàn mua sắm khác. ProjectThaoVy
+            sẽ giúp bạn lưu lại những món đồ yêu thích để dễ dàng tìm lại và mua khi cần.</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary btn-lg" id="heroStart">Bắt đầu sử dụng →</button>
+            <button class="btn btn-ghost btn-lg" data-open="auth">Đăng nhập</button>
+          </div>
+          <div class="hero-note">Miễn phí · Không cần thẻ · Không spam</div>
+        </div>
+
+        <div class="hero-vis">
+          <div class="mockup">
+            <div class="phone">
+              <div class="phone-notch"></div>
+              <div class="phone-head">
+                <span class="phone-logo" id="brandMark2"></span>
+                <span>List của Thảo Vy</span>
+                <b>···</b>
+              </div>
+              <div class="phone-search">Tìm sản phẩm…</div>
+              <div class="phone-chips"><span class="on">Tất cả</span><span>Dự định</span><span>Ưu tiên</span><span>Yêu thích</span></div>
+              <div id="phoneCards"></div>
+              <div class="phone-fab">＋</div>
+            </div>
+            <div class="float-chip chip-a"><span class="mp mp-shopee">S</span> Giày sneaker · 399.000đ</div>
+            <div class="float-chip chip-b"><span class="mp mp-tiktok">♪</span> Tai nghe Bluetooth</div>
+            <div class="float-heart" id="floatHeart">♥</div>
+            <div class="float-note">Thích thì lưu!<br />Cần thì mua ♥</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="how">
+      <h2 class="sec-h2">Hoạt động như thế nào?</h2>
+      <p class="sec-sub">Chỉ mất vài giây cho một món đồ bạn thích.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Copy link sản phẩm</h3>
+          <p>Từ Shopee, TikTok Shop hoặc các sàn TMĐT khác.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Dán vào ProjectThaoVy</h3>
+          <p>Hệ thống tự động lấy ảnh, tên và giá sản phẩm.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Lưu lại và mua khi cần</h3>
+          <p>Phân loại, theo dõi ngân sách và bấm “Mua ngay” khi sẵn sàng.</p>
+        </div>
+      </div>
+      <div class="flowline"><span>THẤY THÍCH</span>→<span>COPY LINK</span>→<span>DÁN</span>→<span>LƯU</span>→<span>MUA KHI CẦN</span></div>
+    </section>
+
+    <section class="why" id="why">
+      <div class="why-grid">
+        <div class="why-card"><i id="icoW1"></i><h3>Riêng tư tuyệt đối</h3><p>Danh sách chỉ mình bạn thấy. Không chia sẻ, không công khai.</p></div>
+        <div class="why-card"><i id="icoW2"></i><h3>Không form phức tạp</h3><p>Không nhập tên, không nhập giá, không tải ảnh. Chỉ cần một URL.</p></div>
+        <div class="why-card"><i id="icoW3"></i><h3>Theo dõi ngân sách</h3><p>Biết trước tháng này “định mua” hết bao nhiêu, còn dư bao nhiêu.</p></div>
+        <div class="why-card"><i id="icoW4"></i><h3>Mua lại đúng link</h3><p>“Mua ngay” mở đúng trang sản phẩm gốc trên sàn, không lòng vòng.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="lfoot">
+    <div class="lfoot-in">
+      <div class="lfoot-brand"><span class="brand-mark sm" id="brandMark3"></span> <b>List</b>cuaThaoVy — <i>những món đồ bạn muốn mua.</i></div>
+      <div class="lfoot-stack">
+        <span>Next.js</span><span>React</span><span>TypeScript</span><span>Tailwind CSS</span><span>Supabase</span><span>PostgreSQL</span><span>Vercel</span>
+      </div>
+      <div class="lfoot-fine">© 2026 _hngnguynn_ · ProjectThaoVy (bản preview demo — chạy hoàn toàn trong trình duyệt).</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════ APP ══════════════════════════════ -->
+<div id="app" class="view app hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <a class="brand" href="#/dashboard">
+        <span class="brand-mark sm" id="brandMark4"></span>
+        <span class="brand-txt"><b>List</b>cuaThaoVy <i id="chevSide">⌄</i></span>
+      </a>
+    </div>
+    <nav class="sb-nav" id="sideNav"></nav>
+    <div class="sb-foot">
+      <button class="btn btn-primary btn-block" id="sideAdd"><i id="icoPlusSide"></i> Thêm sản phẩm</button>
+      <div class="sb-user" id="sbUser"></div>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim"></div>
+
+  <div class="appmain">
+    <header class="topbar">
+      <button class="icon-btn only-mobile" id="btnMenu" aria-label="Menu"><i id="icoMenu"></i></button>
+      <div class="search-wrap">
+        <i id="icoSearch" class="search-ico"></i>
+        <input id="searchInput" class="search-input" type="search" placeholder="Tìm sản phẩm…" autocomplete="off" />
+      </div>
+      <div class="top-right">
+        <button class="icon-btn" id="btnTheme" aria-label="Đổi giao diện sáng/tối"><i id="icoTheme"></i></button>
+        <button class="icon-btn bell" aria-label="Thông báo"><i id="icoBell"></i><span class="bell-dot"></span></button>
+        <div class="avatar-menu" id="avatarMenu"></div>
+      </div>
+    </header>
+    <div class="demo-strip" id="demoStrip"></div>
+    <main class="page" id="page"></main>
+  </div>
+
+  <nav class="bottomnav" id="bottomNav"></nav>
+  <button class="fab" id="fab" aria-label="Thêm sản phẩm"><i id="icoPlusFab"></i></button>
+</div>
+
+<!-- ══════════════════════════════ MODALS ══════════════════════════════ -->
+<div class="modal-root hidden" id="modalAdd">
+  <div class="modal-mask" data-close="modalAdd"></div>
+  <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <div class="modal-head">
+      <h3 id="addTitle"><i id="icoPlusAdd"></i> Thêm sản phẩm</h3>
+      <button class="icon-btn" data-close="modalAdd" aria-label="Đóng"><i id="icoX1"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="fstep"><b>1</b> Dán link sản phẩm</div>
+      <div class="paste-row">
+        <input id="urlInput" class="input" type="url" placeholder="Dán link Shopee, TikTok Shop hoặc sàn TMĐT…" spellcheck="false" />
+        <button class="btn btn-primary" id="btnFetch"><i id="icoLink"></i> Lấy thông tin sản phẩm</button>
+      </div>
+      <div class="hint" id="hintLine"><i id="icoInfo"></i> Hỗ trợ Shopee, TikTok Shop và các sàn TMĐT khác.</div>
+      <div class="hint hint-err hidden" id="fetchErr"></div>
+
+      <div id="metaLoading" class="meta-skeleton hidden">
+        <div class="sk sk-img"></div>
+        <div class="sk-lines"><div class="sk sk-l1"></div><div class="sk sk-l2"></div><div class="sk sk-l3"></div></div>
+        <div class="meta-loading-txt">Đang lấy thông tin sản phẩm…</div>
+      </div>
+
+      <div id="metaBox" class="hidden">
+        <div class="fstep"><b>2</b> Thông tin sản phẩm <span class="lock">🔒 Ảnh, tên và giá được lấy tự động — không thể chỉnh sửa</span></div>
+        <div class="preview-card">
+          <div class="preview-img" id="pvImg"></div>
+          <div class="preview-info">
+            <div class="preview-name" id="pvName"></div>
+            <div class="preview-price" id="pvPrice"></div>
+            <div class="preview-mp" id="pvMp"></div>
+          </div>
+        </div>
+        <div class="demo-note" id="demoNote">Metadata trong bản preview chỉ là mô phỏng. Phiên bản production sẽ xử lý bằng backend.</div>
+
+        <div class="fstep"><b>3</b> Chọn danh mục</div>
+        <div class="grid-2">
+          <div>
+            <label class="lbl" for="catSelect">Danh mục</label>
+            <select id="catSelect" class="input"></select>
+          </div>
+          <div>
+            <label class="lbl">Trạng thái</label>
+            <div class="status-pills" id="statusPills">
+              <button class="pill" data-status="PENDING">Dự định mua</button>
+              <button class="pill on" data-status="PRIORITY"><i>★</i> Ưu tiên mua trước</button>
+              <button class="pill" data-status="FAVORITE"><i>♥</i> Yêu thích</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modalAdd">Hủy</button>
+      <button class="btn btn-primary" id="btnSave" disabled>Lưu sản phẩm</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-root hidden" id="modalDetail">
+  <div class="modal-mask" data-close="modalDetail"></div>
+  <div class="modal modal-lg" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3>Chi tiết sản phẩm</h3><button class="icon-btn" data-close="modalDetail"><i id="icoX2"></i></button></div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot" id="detailFoot"></div>
+  </div>
+</div>
+
+<div class="modal-root hidden" id="modalConfirm">
+  <div class="modal-mask" data-close="modalConfirm"></div>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-body confirm-body" id="confirmBody"></div>
+  </div>
+</div>
+
+<div class="modal-root hidden" id="modalGeneric">
+  <div class="modal-mask" data-close="modalGeneric"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3 id="genericTitle"></h3><button class="icon-btn" data-close="modalGeneric"><i id="icoX3"></i></button></div>
+    <div class="modal-body" id="genericBody"></div>
+    <div class="modal-foot" id="genericFoot"></div>
+  </div>
+</div>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

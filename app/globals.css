@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════
+   ProjectThaoVy — "Aqua Pastel" Design System (v4 — dựng theo mock)
+   Nền mist mint · trắng sữa · hồng candy · giá san hô · nút teal gradient.
+   © _hngnguynn_
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --bg: 239 248 247;        /* Main background  #EFF8F7 */
+  --surface: 255 255 255;   /* Card             #FFFFFF */
+  --ink: 17 48 56;          /* Main text        #113038 */
+  --muted: 91 121 129;      /* Secondary text   #5B7981 */
+  --line: 219 239 236;      /* Border           #DBEFEC */
+  --focus-ring: 15 181 173 / 0.16;
+}
+.dark {
+  --bg: 10 26 32;           /* #0A1A20 — đêm biển */
+  --surface: 15 36 44;      /* #0F242C */
+  --ink: 230 245 243;       /* #E6F5F3 */
+  --muted: 156 192 196;     /* #9CC0C4 */
+  --line: 29 59 69;         /* #1D3B45 */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+::selection {
+  background: #bdf2ec;
+  color: #0a4f4a;
+}
+
+/* Focus rõ ràng cho điều hướng bàn phím */
+:focus-visible {
+  outline: 2px solid #0fb5ad;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Thanh cuộn mềm, tinh tế */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(90, 150, 150, 0.3);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-track { background: transparent; }
+
+@layer components {
+  .input-field {
+    @apply w-full rounded-field border border-line bg-surface px-3.5 py-2.5 text-sm outline-none transition
+      placeholder:text-muted/80 focus:border-teal focus:ring-4 focus:ring-teal/[.14];
+  }
+  select.input-field {
+    @apply cursor-pointer pr-8;
+  }
+
+  /* Nút chính: mint-teal gradient pastel + chữ trắng — đúng theo mock */
+  .btn-primary {
+    @apply font-bold transition duration-150;
+    background: linear-gradient(135deg, #2bd4c7 0%, #10b5ad 100%);
+    color: #ffffff;
+  }
+  .btn-primary:hover { filter: brightness(1.05); }
+  .btn-primary:active { filter: brightness(.95); transform: scale(0.98); }
+
+  /* Container icon 40–44px bo tròn — chuẩn chung toàn app */
+  .icon-box {
+    @apply flex items-center justify-center rounded-[14px];
+    width: 44px;
+    height: 44px;
+    background: #e3f7f4;
+    color: #0fb5ad;
+  }
+  .icon-box-sm {
+    @apply flex items-center justify-center rounded-[12px];
+    width: 40px;
+    height: 40px;
+    background: #e3f7f4;
+    color: #0fb5ad;
+  }
+
+  /* Nhãn nhận diện sàn THƯƠNG MẠI — màu hiệu thật, không phải accent UI */
+  .mp-shopee { background: #ee4d2d; color: #fff; }
+  .mp-tiktok { background: #010101; color: #fff; }
+  .dark .mp-tiktok { background: #e6f2f2; color: #0f1c22; }
+}
+
+/* ── Animation system — chỉ transform/opacity, không layout shift ── */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+.rise-in { animation: rise-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.pop-in { animation: pop-in 0.17s ease-out both; }
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+.modal-in { animation: modal-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes modal-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(10px) scale(0.985); }
+}
+.modal-out { animation: modal-out 0.18s ease-in both; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in { animation: fade-in 0.2s ease-out both; }
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.fade-out { animation: fade-out 0.18s ease-in both; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+.toast-in { animation: toast-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* Trái tim yêu thích: bounce nhẹ 1 → 1.15 → 1 */
+@keyframes fav-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.fav-pop { animation: fav-pop 0.28s ease-in-out both; }
+
+/* Hamburger morph Menu ⇄ X mượt (mobile menu) */
+.ham {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+.ham span {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.15s ease;
+}
+.ham span:nth-child(1) { top: 14px; }
+.ham span:nth-child(2) { top: 23px; }
+.ham.is-open span:nth-child(1) { top: 18.5px; transform: rotate(45deg); }
+.ham.is-open span:nth-child(2) { top: 18.5px; transform: rotate(-45deg); }
+
+/* skeleton shimmer — dịu, không chói */
+.shimmer {
+  background: linear-gradient(
+    100deg,
+    rgba(140, 175, 178, 0.14) 30%,
+    rgba(140, 175, 178, 0.3) 50%,
+    rgba(140, 175, 178, 0.14) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ── Các lớp nền trang trí (mock: mist pastel + nét viết tay) ───── */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+.animate-floaty { animation: floaty 6s ease-in-out infinite; will-change: transform; }
+
+/* Dải hero sáng mềm — nền của trang chủ & landing */
+.hero-mint {
+  background:
+    radial-gradient(560px 260px at 88% -10%, rgba(251, 114, 168, 0.14), transparent 62%),
+    radial-gradient(640px 300px at 6% 112%, rgba(15, 181, 173, 0.16), transparent 60%),
+    linear-gradient(120deg, #e6f8f4 0%, #f1fbfe 55%, #f6fdfb 100%);
+}
+.dark .hero-mint {
+  background:
+    radial-gradient(560px 260px at 88% -10%, rgba(251, 114, 168, 0.1), transparent 62%),
+    radial-gradient(640px 300px at 6% 112%, rgba(15, 181, 173, 0.14), transparent 60%),
+    linear-gradient(120deg, #0d222a 0%, #0c1d26 60%, #0e2028 100%);
+}
+.grad-soft {
+  background: linear-gradient(135deg, #e6f8f4 0%, #f1fbfe 55%, #f6fdfb 100%);
+}
+.dark .grad-soft {
+  background: linear-gradient(135deg, #0d222a 0%, #0c1d26 60%, #0e2028 100%);
+}
+.grad-text {
+  background: linear-gradient(120deg, #0b8f89, #14b8a6 55%, #38d9c6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* chữ viết tay dễ thương (câu quote) — fallback an toàn khi offline */
+.hand {
+  font-family: "Segoe Script", "Bradley Hand", "Comic Sans MS", cursive;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
