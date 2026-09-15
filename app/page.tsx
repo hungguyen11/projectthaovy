@@ -53,7 +53,7 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section className="hero-mint relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-32 right-[12%] h-[380px] w-[380px] rounded-full bg-pinky/15 blur-[80px]" />
+        <div className="pointer-events-none absolute -top-32 right-[12%] h-[380px] w-[380px] rounded-full bg-aqua/20 blur-[80px]" />
         <div className="pointer-events-none absolute bottom-[-120px] left-[6%] h-[320px] w-[320px] rounded-full bg-teal/15 blur-[70px]" />
         <div className="relative mx-auto grid max-w-[1200px] items-center gap-10 px-4 pb-20 pt-14 md:grid-cols-[1.05fr_.95fr] md:px-6 md:pt-16">
           <div>
@@ -92,7 +92,7 @@ export default function LandingPage() {
               <div className="flex items-center gap-2 px-1 pb-2.5 text-[.8rem] font-bold">
                 <Logo size={22} /> List của Thảo Vy <b className="ml-auto font-normal text-muted">···</b>
               </div>
-              <div className="mb-2.5 rounded-[10px] border border-line bg-bg px-2.5 py-1.5 text-[.72rem] text-muted">Tìm sản phẩm, danh mục…</div>
+              <div className="mb-2.5 flex items-center gap-1.5 rounded-full border border-line bg-bg px-3 py-2 text-[.72rem] text-muted shadow-card"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg> Dán link Shopee · TikTok Shop…</div>
               <div className="mb-3 flex flex-wrap gap-1.5 text-[.66rem] font-semibold">
                 <span className="rounded-[8px] bg-teal px-2.5 py-1 text-white">Tất cả</span>
                 <span className="rounded-[8px] border border-line px-2.5 py-1 text-muted">Dự định</span>
@@ -100,16 +100,16 @@ export default function LandingPage() {
                 <span className="rounded-[8px] border border-line px-2.5 py-1 text-muted">Yêu thích</span>
               </div>
               {[
-                { n: "Giày sneaker nữ basic", p: "399.000đ – 499.000đ", img: "/products/sneaker.svg", b: "Ưu tiên", cls: "bg-pinky-soft text-[#DB4D8C]" },
-                { n: "Tai nghe Bluetooth TWS", p: "699.000đ", img: "/products/headphones.svg", b: "Yêu thích", cls: "bg-[#FFE3EA] text-[#D6336C]" },
-                { n: "Túi xách da mềm quai ngắn", p: "259.000đ", img: "/products/bag.svg", b: "Đã mua", cls: "bg-mint-soft text-[#0B8A66]" },
+                { n: "Giày sneaker nữ basic", p: "399.000đ – 499.000đ", img: "/products/sneaker.svg", b: "Ưu tiên", cls: "bg-honey-soft text-amber-700" },
+                { n: "Tai nghe Bluetooth TWS", p: "699.000đ", img: "/products/headphones.svg", b: "Yêu thích", cls: "bg-[#FCE7F3] text-[#E11D48]" },
+                { n: "Túi xách da mềm quai ngắn", p: "259.000đ", img: "/products/bag.svg", b: "Đã mua", cls: "bg-mint-soft text-[#059669]" },
               ].map((c) => (
                 <div key={c.n} className="mb-2 flex items-center gap-2.5 rounded-[14px] border border-line bg-surface p-2 shadow-card">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={c.img} alt="" className="h-11 w-11 flex-none rounded-[9px] object-cover" />
                   <div className="min-w-0">
                     <p className="truncate text-[.72rem] font-bold">{c.n}</p>
-                    <p className="text-[.7rem] font-extrabold text-coral">{c.p}</p>
+                    <p className="text-[.7rem] font-extrabold text-ink">{c.p}</p>
                   </div>
                   <span className={`ml-auto rounded-[8px] px-1.5 py-0.5 text-[.6rem] font-bold ${c.cls}`}>{c.b}</span>
                 </div>
@@ -186,7 +186,7 @@ export default function LandingPage() {
           <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">
             Món đồ bạn thích đang chờ được <span className="grad-text">lưu lại</span>
           </h2>
-          <p className="hand max-w-[40ch] text-[1rem] text-[#2B6B66] dark:text-teal-200">{SITE.motto}</p>
+          <p className="hand max-w-[40ch] text-[1rem] text-[#0E7490] dark:text-teal-200">{SITE.motto}</p>
           <Link
             href="/register"
             className="btn-primary mt-1 inline-flex items-center gap-2 rounded-[12px] px-7 py-3 text-base shadow-cta transition"

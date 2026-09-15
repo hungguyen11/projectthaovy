@@ -109,7 +109,7 @@ function DetailBody({ product: p, onStatus }: { product: Product; onStatus: (s: 
       {/* thông tin */}
       <div className="min-w-0">
         <h4 className="text-[1.05rem] font-extrabold leading-snug tracking-tight">{p.product_name}</h4>
-        <p className="mt-1.5 text-[1.3rem] font-extrabold tracking-tight text-coral">
+        <p className="mt-1.5 text-[1.3rem] font-extrabold tracking-tight text-ink">
           {p.price_label || (p.price != null ? formatVnd(p.price) : "Chưa có giá")}
         </p>
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
@@ -126,7 +126,7 @@ function DetailBody({ product: p, onStatus }: { product: Product; onStatus: (s: 
           ) : null}
         </div>
 
-        <div className="mt-4 rounded-[16px] border border-line bg-bg/70 p-4 dark:bg-[#0D222A]">
+        <div className="mt-4 rounded-[16px] border border-line bg-bg/70 p-4 dark:bg-[#0F1B31]">
           <p className="mb-2 text-[.7rem] font-extrabold uppercase tracking-[.07em] text-muted">Thông tin sản phẩm</p>
           <dl className="space-y-2 text-[.85rem]">
             <Row k="Danh mục">{p.category?.name ?? "Chưa phân loại"}</Row>

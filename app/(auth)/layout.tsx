@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="grad-soft relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
       <div className="pointer-events-none absolute -top-32 right-1/4 h-[380px] w-[380px] rounded-full bg-[#99F6E4] opacity-50 blur-[70px] dark:opacity-15" />
-      <div className="pointer-events-none absolute -bottom-32 left-1/4 h-[340px] w-[340px] rounded-full bg-[#FBC7DD] opacity-45 blur-[70px] dark:opacity-10" />
+      <div className="pointer-events-none absolute -bottom-32 left-1/4 h-[340px] w-[340px] rounded-full bg-[#F9A8D4] opacity-45 blur-[70px] dark:opacity-10" />
       <div className="relative w-full max-w-[960px] overflow-hidden rounded-[28px] border border-line bg-surface shadow-pop md:grid md:grid-cols-[.9fr_1.1fr]">
         <aside className="hidden flex-col justify-between bg-surface/60 p-8 md:flex">
           <Link href="/" className="flex items-center gap-2.5">

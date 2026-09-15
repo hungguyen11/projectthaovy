@@ -39,7 +39,7 @@ export function SiteMenu({
         <span />
       </button>
       {open ? (
-        <div className="pop-in absolute right-0 top-12 z-50 w-[220px] rounded-[18px] border border-line bg-surface p-2 shadow-pop dark:bg-[#0F242C]">
+        <div className="pop-in absolute right-0 top-12 z-50 w-[220px] rounded-[18px] border border-line bg-surface p-2 shadow-pop dark:bg-[#111B2D]">
           {links.map((l) => (
             <Link
               key={l.href}

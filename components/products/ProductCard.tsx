@@ -72,7 +72,7 @@ export function ProductCard({ product, index = 0, compact = false }: { product: 
           {product.product_name}
         </h4>
         {hasPrice ? (
-          <p className={cn("font-extrabold tracking-tight text-coral", compact ? "text-[.86rem]" : "text-[1rem]")}>
+          <p className={cn("font-extrabold tracking-tight text-ink", compact ? "text-[.86rem]" : "text-[1rem]")}>
             {product.price_label || formatVnd(product.price)}
           </p>
         ) : (

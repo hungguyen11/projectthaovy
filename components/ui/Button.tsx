@@ -14,7 +14,7 @@ type Size = "sm" | "md" | "lg";
 const VARIANTS: Record<Variant, string> = {
   primary: "btn-primary shadow-cta",
   ghost: "border border-line bg-surface text-ink shadow-card hover:border-teal hover:text-teal-ink dark:hover:text-teal-200",
-  soft: "bg-teal-soft text-teal-ink hover:bg-aqua-mist dark:bg-[#0E3A3D] dark:text-teal-200",
+  soft: "bg-teal-soft text-teal-ink hover:bg-aqua-mist dark:bg-[#083344] dark:text-teal-200",
   danger: "bg-rose text-white shadow-[0_6px_16px_-8px_rgba(239,68,68,.6)] hover:brightness-105 active:brightness-95",
 };
 

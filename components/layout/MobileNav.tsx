@@ -25,7 +25,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="fixed inset-x-0 bottom-0 z-[70] border-t border-line bg-surface px-2 pb-[max(7px,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-6px_24px_-12px_rgba(24,64,68,.18)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-[70] border-t border-line bg-surface px-2 pb-[max(7px,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-6px_24px_-12px_rgba(15,23,42,.18)] md:hidden">
         <div className="relative mx-auto grid max-w-md grid-cols-5 items-center">
           {items.map((it, i) =>
             it ? (
@@ -37,7 +37,7 @@ export function MobileNav() {
                   it.active ? "text-teal" : "text-muted"
                 )}
               >
-                <span className={cn("flex h-7 w-full items-center justify-center rounded-[10px]", it.active && "bg-teal-soft dark:bg-[#0E3A3D]")}>
+                <span className={cn("flex h-7 w-full items-center justify-center rounded-[10px]", it.active && "bg-teal-soft dark:bg-[#083344]")}>
                   <it.icon className="h-[20px] w-[20px]" />
                 </span>
                 {it.label}

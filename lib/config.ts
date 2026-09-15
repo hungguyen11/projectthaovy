@@ -21,26 +21,26 @@ export const STATUS_META: Record<
   PENDING: {
     label: "Dự định mua",
     short: "Dự định mua",
-    chip: "bg-surface/95 text-[#48646B] shadow-card ring-1 ring-line dark:bg-[#0F242C]/95 dark:text-[#9CC0C4]",
-    tint: "bg-aqua-soft text-[#3E6B72] dark:bg-[#122C33] dark:text-[#9CC0C4]",
+    chip: "bg-surface/95 text-[#475569] shadow-card ring-1 ring-line dark:bg-[#111B2D]/95 dark:text-[#94A3B8]",
+    tint: "bg-aqua-soft text-[#475569] dark:bg-[#1E293B] dark:text-[#94A3B8]",
   },
   PRIORITY: {
     label: "Ưu tiên mua trước",
     short: "Ưu tiên",
-    chip: "bg-pinky-soft text-[#DB4D8C] dark:bg-[#3A1E31] dark:text-[#F9A8D4]",
-    tint: "bg-pinky-soft text-[#DB4D8C] dark:bg-[#3A1E31] dark:text-[#F9A8D4]",
+    chip: "bg-honey-soft text-amber-700 dark:bg-[#3A2C14] dark:text-amber-300",
+    tint: "bg-honey-soft text-amber-700 dark:bg-[#3A2C14] dark:text-amber-300",
   },
   FAVORITE: {
     label: "Yêu thích",
     short: "Yêu thích",
-    chip: "bg-[#FFE3EA] text-[#D6336C] dark:bg-[#38172014] dark:bg-[#381722] dark:text-[#FDA4AF]",
-    tint: "bg-[#FFE3EA] text-[#D6336C] dark:bg-[#381722] dark:text-[#FDA4AF]",
+    chip: "bg-[#FCE7F3] text-[#E11D48] dark:bg-[#3F1D2B] dark:text-[#FDA4AF]",
+    tint: "bg-[#FCE7F3] text-[#E11D48] dark:bg-[#3F1D2B] dark:text-[#FDA4AF]",
   },
   PURCHASED: {
     label: "Đã mua",
     short: "Đã mua",
-    chip: "bg-mint-soft text-[#0B8A66] dark:bg-[#0E352B] dark:text-[#6EE7B7]",
-    tint: "bg-mint-soft text-[#0B8A66] dark:bg-[#0E352B] dark:text-[#6EE7B7]",
+    chip: "bg-mint-soft text-[#059669] dark:bg-[#053B2E] dark:text-[#6EE7B7]",
+    tint: "bg-mint-soft text-[#059669] dark:bg-[#053B2E] dark:text-[#6EE7B7]",
   },
 };
 
@@ -52,7 +52,7 @@ export const MARKETPLACE_META: Record<Marketplace, { label: string; badge: strin
   TIKTOK_SHOP: { label: "TikTok Shop", badge: "bg-[#E9F1F1] text-[#010101] dark:bg-[#1C2833] dark:text-[#E9F1F1]", letter: "♪" },
   LAZADA: { label: "Lazada", badge: "bg-[#EFF0FF] text-[#5B4EE8] dark:bg-[#1E2148] dark:text-[#B4BCFF]", letter: "L" },
   TIKI: { label: "Tiki", badge: "bg-[#E6F4FF] text-[#0268AA] dark:bg-[#122A40] dark:text-[#7CC4F2]", letter: "T" },
-  OTHER: { label: "Web khác", badge: "bg-aqua-soft text-teal-ink dark:bg-[#0E3A3D] dark:text-teal-200", letter: "↗" },
+  OTHER: { label: "Web khác", badge: "bg-aqua-soft text-teal-ink dark:bg-[#083344] dark:text-teal-200", letter: "↗" },
 };
 
 export function detectMarketplace(url: string): Marketplace {

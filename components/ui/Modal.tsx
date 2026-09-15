@@ -61,7 +61,7 @@ export function Modal({
   return createPortal(
     <div className="fixed inset-0 z-[150] flex items-end justify-center p-0 md:items-center md:p-4">
       <div
-        className={cn("absolute inset-0 bg-[#0A1A20]/50", closing ? "fade-out" : "fade-in")}
+        className={cn("absolute inset-0 bg-[#0A0F1E]/50", closing ? "fade-out" : "fade-in")}
         onClick={onClose}
       />
       <div

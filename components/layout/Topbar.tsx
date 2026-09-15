@@ -45,7 +45,7 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
   const initial = (profile?.display_name || profile?.username || "B").slice(0, 1).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-line/60 bg-bg px-4 py-3 md:px-[26px]">
+    <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-line/60 bg-bg/85 backdrop-blur px-4 py-3 md:px-[26px]">
       <button
         type="button"
         className={`ham text-muted hover:bg-teal-soft hover:text-teal-deep md:hidden ${open ? "is-open" : ""}`}
@@ -102,7 +102,7 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
                         setBellOpen(false);
                         setDetailProduct(rp);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition hover:bg-aqua-mist dark:hover:bg-[#122C33]"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition hover:bg-aqua-mist dark:hover:bg-[#1E293B]"
                     >
                       <span className={`flex h-7 w-7 flex-none items-center justify-center rounded-[8px] text-[.66rem] font-extrabold ${mp.badge}`}>
                         <i className="not-italic">{mp.letter}</i>
@@ -122,7 +122,7 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
                       setBellOpen(false);
                       setAddOpen(true);
                     }}
-                    className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-teal-soft px-3.5 py-1.5 text-[.76rem] font-extrabold text-teal-ink transition hover:brightness-95 active:scale-95 dark:bg-[#0E3A3D] dark:text-teal-200"
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-teal-soft px-3.5 py-1.5 text-[.76rem] font-extrabold text-teal-ink transition hover:brightness-95 active:scale-95 dark:bg-[#083344] dark:text-teal-200"
                   >
                     <Plus className="h-3.5 w-3.5" /> Lưu món đầu tiên
                   </button>
@@ -137,7 +137,7 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
             onClick={() => setOpenPop((v) => !v)}
             className="flex items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-2.5 text-sm font-semibold shadow-card transition hover:border-teal"
           >
-            <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full btn-primary text-[.72rem] font-extrabold text-cta">
+            <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full btn-primary text-[.72rem] font-extrabold text-white">
               {profile?.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -151,7 +151,7 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
           {openPop ? (
             <div className="pop-in absolute right-0 top-12 z-50 min-w-[216px] rounded-2xl border border-line bg-surface p-2 shadow-pop">
               <div className="flex items-center gap-2.5 p-2">
-                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full btn-primary text-sm font-extrabold text-cta">
+                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full btn-primary text-sm font-extrabold text-white">
                   {profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />

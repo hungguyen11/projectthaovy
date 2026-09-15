@@ -5,10 +5,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
   List,
-  Heart,
-  Star,
-  Bookmark,
-  CheckCircle2,
   Tags,
   Settings,
   User,
@@ -43,8 +39,8 @@ export function NavItem({
       onClick={onClick}
       className={cn(
         "flex w-full items-center gap-2.5 rounded-[12px] px-3 py-[9px] text-[.875rem] font-medium text-muted transition",
-        "hover:bg-aqua-mist hover:text-ink dark:hover:bg-[#122C33]",
-        active && "bg-teal-soft font-bold text-teal-ink dark:bg-[#0E3A3D] dark:text-teal-200"
+        "hover:bg-aqua-mist hover:text-ink dark:hover:bg-[#1E293B]",
+        active && "bg-teal-soft font-bold text-teal-ink dark:bg-[#083344] dark:text-teal-200"
       )}
     >
       <Icon className={cn("h-[18px] w-[18px]", active && "text-teal dark:text-teal-300")} />
@@ -84,10 +80,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-1.5">
         <NavItem href="/dashboard" icon={LayoutDashboard} label="Tổng quan" active={isActive("/dashboard")} onClick={onNavigate} />
         <NavItem href="/products" icon={List} label="Tất cả sản phẩm" active={isActive("/products")} onClick={onNavigate} />
-        <NavItem href="/products?status=FAVORITE" icon={Heart} label="Yêu thích" active={isActive("/products?status=FAVORITE")} onClick={onNavigate} />
-        <NavItem href="/products?status=PRIORITY" icon={Star} label="Ưu tiên mua" active={isActive("/products?status=PRIORITY")} onClick={onNavigate} />
-        <NavItem href="/products?status=PENDING" icon={Bookmark} label="Dự định mua" active={isActive("/products?status=PENDING")} onClick={onNavigate} />
-        <NavItem href="/products?status=PURCHASED" icon={CheckCircle2} label="Đã mua" active={isActive("/products?status=PURCHASED")} onClick={onNavigate} />
         <NavItem href="/categories" icon={Tags} label="Danh mục" active={isActive("/categories")} onClick={onNavigate} />
         <NavItem href="/settings" icon={Settings} label="Cài đặt" active={isActive("/settings")} onClick={onNavigate} />
         <NavItem href="/account" icon={User} label="Tài khoản" active={isActive("/account")} onClick={onNavigate} />
@@ -98,24 +90,13 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <form action="/api/auth/signout" method="post" onSubmit={() => toast("info", "Đang đăng xuất…")}>
           <button
             type="submit"
-            className="flex w-full items-center gap-2.5 rounded-[12px] px-3 py-[9px] text-[.875rem] font-medium text-muted transition hover:bg-rose-soft hover:text-red-600 dark:hover:bg-[#381722]"
+            className="flex w-full items-center gap-2.5 rounded-[12px] px-3 py-[9px] text-[.875rem] font-medium text-muted transition hover:bg-rose-soft hover:text-red-600 dark:hover:bg-[#3F1D2B]"
           >
             <LogOut className="h-[18px] w-[18px]" />
             <span>Đăng xuất</span>
           </button>
         </form>
       </nav>
-
-      {/* quote viết tay — đúng chất mock */}
-      <div className="m-3 mt-1 rounded-[16px] bg-aqua-soft/80 px-4 py-3.5 text-center dark:bg-[#0D222A]">
-        <p className="hand text-[.86rem] leading-relaxed text-[#2B6B66] dark:text-teal-200">
-          Thấy thích
-          <br />
-          thì lưu lại,
-          <br />
-          cần thì mua! <span className="text-pinky">🤍</span>
-        </p>
-      </div>
     </div>
   );
 }

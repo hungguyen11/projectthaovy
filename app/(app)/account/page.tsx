@@ -52,7 +52,7 @@ export default function AccountPage() {
         {[
           { label: "Tổng", v: stats.total, icon: CheckCircle2, cls: "bg-teal-soft text-teal dark:text-teal-300" },
           { label: "Dự định", v: stats.PENDING, icon: Clock, cls: "bg-baby-soft text-sky-600 dark:text-sky-300" },
-          { label: "Yêu thích", v: stats.FAVORITE, icon: UserIcon, cls: "bg-pinky-soft text-[#DB4D8C] dark:text-[#F9A8D4]" },
+          { label: "Yêu thích", v: stats.FAVORITE, icon: UserIcon, cls: "bg-pinky-soft text-[#DB2777] dark:text-[#F9A8D4]" },
           { label: "Đã mua", v: stats.PURCHASED, icon: CreditCard, cls: "bg-mint-soft text-mint dark:text-[#6EE7B7]" },
         ].map((s) => (
           <div key={s.label} className="rounded-card border border-line bg-surface p-4 text-center shadow-card">

@@ -9,7 +9,7 @@ export function Logo({ size = 34 }: { size?: number }) {
       style={{
         width: size,
         height: size,
-        background: "linear-gradient(140deg, #3ADFCF 0%, #0FB5AD 100%)",
+        background: "linear-gradient(140deg, #22D3EE 0%, #0891B2 100%)",
       }}
       aria-hidden
     >
@@ -29,7 +29,7 @@ export function Logo({ size = 34 }: { size?: number }) {
         {/* trái tim hồng */}
         <path
           d="M12 16.6c-1.9-1.2-2.8-2.15-2.8-3.3 0-.96.72-1.7 1.63-1.7.53 0 .93.26 1.17.66.24-.4.64-.66 1.17-.66.91 0 1.63.74 1.63 1.7 0 1.15-.9 2.1-2.8 3.3Z"
-          fill="#FB72A8"
+          fill="#EC4899"
         />
       </svg>
     </span>

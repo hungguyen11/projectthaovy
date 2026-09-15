@@ -2,9 +2,10 @@ import colors from "tailwindcss/colors";
 import type { Config } from "tailwindcss";
 
 /**
- * ProjectThaoVy — Design System "Aqua Pastel" (v4 — theo mock của chủ nhân 🫧)
- * Nền mist xanh mint siêu nhạt · card trắng bo mềm · giá màu san hô ·
- * hồng candy cho yêu thích/ưu tiên · button teal pastel (gradient nhẹ).
+ * ProjectThaoVy — Design System "Cyan Minimal" (v5)
+ * Nền trắng/xám rất nhạt · chữ slate đậm · accent CYAN chỉ cho điểm nhấn
+ * (nút chính, active, icon, highlight) · dark navy/charcoal độ tương phản cao.
+ * Card bo 18px, border mảnh, shadow rất nhẹ, typography Inter.
  * © _hngnguynn_
  */
 const config: Config = {
@@ -21,30 +22,29 @@ const config: Config = {
         ink: "rgb(var(--ink) / <alpha-value>)",
         muted: "rgb(var(--muted) / <alpha-value>)",
         line: "rgb(var(--line) / <alpha-value>)",
-        cta: "#0B7C76",
-        /* token "teal" = họ nút/chip chính — giờ là mint-teal pastel */
+        cta: "#0E7490",
+        /* token "teal" = họ accent CYAN chính của toàn app */
         teal: {
-          DEFAULT: "#0FB5AD",
-          deep: "#0E9A93",
-          soft: "#E3F7F4",
-          ink: "#0B7C76",
-          200: "#99F6E4",
-          300: "#5EEAD4",
-          950: "#0E3A3D",
+          DEFAULT: "#0891B2",
+          deep: "#0E7490",
+          soft: "#E5F6FB",
+          ink: "#0E7490",
+          200: "#A5F3FC",
+          300: "#67E8F9",
+          950: "#083344",
         },
-        aqua: { DEFAULT: "#7DEAE0", mist: "#EAF9F7", soft: "#F4FBFA" },
-        pinky: { DEFAULT: "#FB72A8", soft: "#FFE4F0" },
-        coral: { DEFAULT: "#F4522E", soft: "#FFEBE5" },
-        lilac: { DEFAULT: "#8B5CF6", soft: "#EFE9FE" },
-        baby: { DEFAULT: "#38BDF8", soft: "#E0F2FE" },
-        mint: { DEFAULT: "#10B981", soft: "#DFF7EC" },
-        honey: { DEFAULT: "#F59E0B", soft: "#FFF3DE" },
-        rose: { ...colors.rose, DEFAULT: "#EF4444", soft: "#FFE9E9" },
+        aqua: { DEFAULT: "#22D3EE", mist: "#F0F8FC", soft: "#E8F5FA" },
+        pinky: { DEFAULT: "#EC4899", soft: "#FDEFF7" },
+        lilac: { DEFAULT: "#8B5CF6", soft: "#F1EDFE" },
+        baby: { DEFAULT: "#38BDF8", soft: "#EAF6FE" },
+        mint: { DEFAULT: "#10B981", soft: "#E6F7F0" },
+        honey: { DEFAULT: "#F59E0B", soft: "#FEF4E3" },
+        rose: { ...colors.rose, DEFAULT: "#E11D48", soft: "#FEE9ED" },
       },
       fontFamily: {
         sans: [
-          '"Be Vietnam Pro"',
           "Inter",
+          '"Be Vietnam Pro"',
           "system-ui",
           "-apple-system",
           "Segoe UI",
@@ -58,10 +58,10 @@ const config: Config = {
         field: "12px",
       },
       boxShadow: {
-        card: "0 1px 2px rgba(24,64,68,.05), 0 2px 8px rgba(24,64,68,.05)",
-        lift: "0 12px 28px -14px rgba(15,181,173,.35), 0 2px 8px rgba(24,64,68,.06)",
-        pop: "0 24px 60px -16px rgba(14,120,116,.28), 0 6px 18px rgba(24,64,68,.08)",
-        cta: "0 8px 20px -8px rgba(15,181,173,.45)",
+        card: "0 1px 2px rgba(15,23,42,.05), 0 1px 3px rgba(15,23,42,.04)",
+        lift: "0 12px 28px -14px rgba(8,145,178,.28), 0 2px 8px rgba(15,23,42,.05)",
+        pop: "0 24px 64px -18px rgba(8,42,74,.22), 0 6px 18px rgba(15,23,42,.07)",
+        cta: "0 8px 20px -8px rgba(8,145,178,.40)",
       },
       keyframes: {
         rise: { from: { opacity: "0", transform: "translateY(10px)" }, to: { opacity: "1", transform: "none" } },

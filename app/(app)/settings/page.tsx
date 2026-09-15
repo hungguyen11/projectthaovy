@@ -243,9 +243,9 @@ function ProfileCard({ profile, onSaved }: { profile: Profile | null; onSaved: (
 function ThemeCard() {
   const { theme, setTheme } = useTheme();
   const opts = [
-    { v: "light", label: "Light", icon: Sun, sw: "bg-[#EFF8F7]" },
-    { v: "dark", label: "Dark", icon: Moon, sw: "bg-[#0E1526]" },
-    { v: "system", label: "System", icon: Monitor, sw: "bg-gradient-to-r from-[#EFF8F7] from-50% to-[#0A1A20] to-50%" },
+    { v: "light", label: "Light", icon: Sun, sw: "bg-[#F8FAFC]" },
+    { v: "dark", label: "Dark", icon: Moon, sw: "bg-[#0F172A]" },
+    { v: "system", label: "System", icon: Monitor, sw: "bg-gradient-to-r from-[#F8FAFC] from-50% to-[#0A0F1E] to-50%" },
   ];
   return (
     <Section title="Giao diện" sub="Sáng · Tối · Theo hệ thống — lưu ngay trong trình duyệt.">
