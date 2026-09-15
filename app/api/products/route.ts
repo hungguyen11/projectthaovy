@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireUser, jsonError, route } from "@/lib/session";
 import { validateUrl } from "@/lib/metadata/ssrf";
-import { detectMarketplace, DEFAULT_CATEGORIES } from "@/lib/config";
+import { detectMarketplace } from "@/lib/config";
 import { normalizeUrl } from "@/lib/utils";
 import type { Product, ProductStatus } from "@/types";
 

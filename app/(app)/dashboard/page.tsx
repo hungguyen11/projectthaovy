@@ -50,9 +50,9 @@ export default function DashboardPage() {
           <Link
             key={c.key}
             href={c.href}
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface py-1.5 pl-2 pr-3.5 text-[.82rem] font-bold shadow-card transition hover:-translate-y-[2px] hover:border-teal/45"
+            className="group inline-flex items-center gap-2 rounded-full border border-line bg-surface py-1.5 pl-2 pr-3.5 text-[.82rem] font-bold shadow-card transition hover:-translate-y-[2px] hover:border-teal/45"
           >
-            <span className={`flex h-6 w-6 items-center justify-center rounded-full ${c.tint}`}>
+            <span className={`chip-tilt flex h-6 w-6 items-center justify-center rounded-full ${c.tint}`}>
               <c.icon className="h-3.5 w-3.5" />
             </span>
             <span className="text-muted">{c.label}</span>

@@ -9,6 +9,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { AddProductModal } from "@/components/products/AddProductModal";
 import { ProductDetailModal } from "@/components/products/ProductDetailModal";
 import { ConfigNotice } from "@/components/ConfigNotice";
+import { applyAccent, getAccent } from "@/lib/accent";
 
 const SUPABASE_READY = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
@@ -17,6 +18,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [sideOpen, setSideOpen] = useState(false);
   const pathname = usePathname();
   useEffect(() => setSideOpen(false), [pathname]);
+  useEffect(() => applyAccent(getAccent()), []); // chủ đề accent lưu trong máy
 
   return (
     <AppProvider>
@@ -49,7 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ) : null}
           <main className="mx-auto w-full max-w-[1280px] flex-1 px-3.5 pb-28 pt-1 md:px-[26px] md:pb-10">{children}</main>
           <footer className="mx-auto w-full max-w-[1280px] px-3.5 pb-[104px] pt-4 text-center text-[.72rem] font-medium text-muted md:px-[26px] md:pb-5">
-            © {new Date().getFullYear()} List của Thảo Vy · Bản quyền <b className="font-bold text-ink">_hngnguynn_</b>
+            © {new Date().getFullYear()} Wishlist của Thảo Vy · Bản quyền <b className="font-bold text-ink">_hngnguynn_</b>
           </footer>
         </div>
       </div>

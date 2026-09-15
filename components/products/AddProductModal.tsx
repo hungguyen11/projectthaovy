@@ -2,9 +2,9 @@
 
 /**
  * Bước cốt lõi của cả website:
- *   DÁN LINK → hệ thống lấy ẢNH + TÊN + GIÁ → chọn danh mục → chọn trạng thái → LƯU.
- * Ảnh/tên lấy từ link là READ-ONLY. Nếu KHÔNG lấy được (link lỗi/sàn chặn) hoặc thiếu giá,
- * người dùng có thể DỪNG LẠI và tự nhập GIÁ để vẫn lưu được sản phẩm.
+ *   DÁN LINK → hệ thống lấy ẢNH + TÊN + GIÁ (nếu lấy được) → chọn danh mục → LƯU.
+ * Không có ô nhập giá: sàn trả giá thì hiển thị, không trả thì bỏ trống — vẫn lưu bình thường.
+ * Khi link không đọc được, chỉ cho phép thêm TÊN/ẢNH tùy chọn (không nhập giá).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, Lock, PencilLine, Plus, Search, TriangleAlert } from "lucide-react";
@@ -16,7 +16,7 @@ import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { api, ApiError } from "@/lib/api-client";
 import { extractFirstUrl } from "@/lib/metadata/link";
 import { MARKETPLACE_META, FALLBACK_IMAGE } from "@/lib/config";
-import { cn, formatVnd, parseVndFlexible } from "@/lib/utils";
+import { cn, formatVnd } from "@/lib/utils";
 import type { ExtractedMeta, ProductStatus } from "@/types";
 
 type Phase = "idle" | "loading" | "done" | "error";
@@ -31,7 +31,6 @@ export function AddProductModal() {
   const [meta, setMeta] = useState<ExtractedMeta | null>(null);
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState<ProductStatus>("PENDING");
-  const [manualPrice, setManualPrice] = useState("");
   const [manualTitle, setManualTitle] = useState("");
   const [manualImage, setManualImage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -44,7 +43,6 @@ export function AddProductModal() {
     setErrMsg("");
     setMeta(null);
     setStatus("PENDING");
-    setManualPrice("");
     setManualTitle("");
     setManualImage("");
     setSaving(false);
@@ -91,19 +89,17 @@ export function AddProductModal() {
   const stopFetching = () => {
     fetchId.current += 1; // vô hiệu hóa kết quả fetch đang chạy
     setPhase("error");
-    setErrMsg("Bạn đã dừng lấy thông tin. Nhập giá thủ công bên dưới rồi lưu — link vẫn được giữ để mở lại sau.");
+    setErrMsg("Bạn đã dừng lấy thông tin. Vẫn lưu được bình thường — link được giữ để mở lại sau.");
   };
 
-  const manualParsed = parseVndFlexible(manualPrice);
   const manualImgUrl = manualImage.trim().startsWith("http") ? manualImage.trim() : null;
   const manualMode = !meta && phase === "error";
-  const metaLacksPrice = !!meta && meta.price == null && !meta.price_label;
-  const canSave = meta ? phase === "done" : manualMode && (manualParsed != null || manualTitle.trim().length >= 2);
+  const canSave = meta ? phase === "done" : manualMode;
 
   const save = async () => {
     if (!canSave || saving) return;
     setSaving(true);
-    const price = meta ? meta.price ?? manualParsed : manualParsed;
+    const price = meta?.price ?? null;
     const priceLabel = meta?.price_label ?? (price != null ? formatVnd(price) : null);
     const res = await addProduct({
       source_url: (meta?.source_url ?? extractFirstUrl(url) ?? url).trim(),
@@ -194,7 +190,7 @@ export function AddProductModal() {
       </div>
       <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
         <TriangleAlert className="h-3.5 w-3.5 flex-none" />
-        Ảnh · tên · giá lấy tự động. Link khó đọc? Bấm “Dừng lại” rồi tự nhập giá — vẫn lưu được.
+        Ảnh · tên · giá (nếu lấy được) hiển thị tự động. Không có giá thì vẫn lưu bình thường.
       </p>
 
       {phase === "loading" && !meta ? (
@@ -217,9 +213,9 @@ export function AddProductModal() {
           </p>
           <div className="mt-3 rounded-xl border border-line bg-surface p-3">
             <p className="flex items-center gap-1.5 text-[.82rem] font-extrabold text-ink">
-              <PencilLine className="h-4 w-4" /> Tự nhập tên & giá
+              <PencilLine className="h-4 w-4" /> Thêm tên / ảnh (không bắt buộc)
             </p>
-            <p className="mt-0.5 text-[.74rem] text-muted">Chỉ cần giá là lưu được; thêm tên & link ảnh (không bắt buộc) cho đẹp — bỏ trống ảnh sẽ dùng mặc định của app.</p>
+            <p className="mt-0.5 text-[.74rem] text-muted">Không đọc được từ link — chỉ cần Lưu là đủ, link vẫn mở đúng sàn. Tên & ảnh thêm tùy thích.</p>
             <input
               className="input-field mt-2"
               placeholder="Tên sản phẩm (không bắt buộc) — VD: Mũ lưỡi trai Tim và friends"
@@ -232,18 +228,6 @@ export function AddProductModal() {
               value={manualImage}
               onChange={(e) => setManualImage(e.target.value)}
             />
-            <input
-              className="input-field mt-2 max-w-[240px]"
-              placeholder="VD: 399.000 hoặc 399k"
-              value={manualPrice}
-              onChange={(e) => setManualPrice(e.target.value)}
-              inputMode="numeric"
-            />
-            {manualPrice.trim() ? (
-              <p className="mt-1.5 text-[.78rem] font-bold text-teal-ink dark:text-teal-200">
-                {manualParsed != null ? `Sẽ lưu: ${formatVnd(manualParsed)}` : "Không hiểu con số này — thử dạng 399.000 nhé."}
-              </p>
-            ) : null}
           </div>
         </div>
       ) : null}
@@ -273,25 +257,8 @@ export function AddProductModal() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="line-clamp-2 text-[.95rem] font-extrabold leading-snug">{meta.title}</p>
-              <p className={cn("mt-1.5 text-lg font-extrabold", metaLacksPrice ? "text-muted" : "text-rose-600 dark:text-rose-300")}>
-                {meta.price_label ?? (meta.price != null ? formatVnd(meta.price) : "Chưa có giá từ link")}
-              </p>
-              {metaLacksPrice ? (
-                <div className="mt-2 max-w-[240px]">
-                  <label className="flex items-center gap-1.5 text-[.74rem] font-bold text-muted">
-                    <PencilLine className="h-3.5 w-3.5" /> Nhập giá tay:
-                  </label>
-                  <input
-                    className="input-field mt-1 !py-1.5 !text-sm"
-                    placeholder="VD: 299.000"
-                    value={manualPrice}
-                    onChange={(e) => setManualPrice(e.target.value)}
-                    inputMode="numeric"
-                  />
-                  {manualPrice.trim() && manualParsed != null ? (
-                    <p className="mt-1 text-[.74rem] font-bold text-teal-ink dark:text-teal-200">→ {formatVnd(manualParsed)}</p>
-                  ) : null}
-                </div>
+              {meta.price_label || meta.price != null ? (
+                <p className="mt-1.5 text-lg font-extrabold">{meta.price_label ?? formatVnd(meta.price as number)}</p>
               ) : null}
               {!meta.image ? (
                 <div className="mt-2">

@@ -9,7 +9,7 @@ export function Logo({ size = 34 }: { size?: number }) {
       style={{
         width: size,
         height: size,
-        background: "linear-gradient(140deg, #22D3EE 0%, #0891B2 100%)",
+        background: "linear-gradient(140deg, rgb(var(--accent-bright)) 0%, rgb(var(--accent)) 100%)",
       }}
       aria-hidden
     >

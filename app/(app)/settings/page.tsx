@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Camera, Loader2, Monitor, Moon, Save, Sun, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, Check, Loader2, Monitor, Moon, Save, Sun, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { ACCENTS, getAccent, setAccent, type AccentId } from "@/lib/accent";
 import { useApp } from "@/components/providers/AppProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/Button";
@@ -242,13 +243,15 @@ function ProfileCard({ profile, onSaved }: { profile: Profile | null; onSaved: (
 
 function ThemeCard() {
   const { theme, setTheme } = useTheme();
+  const [accent, setAccentState] = useState<AccentId>("cyan");
+  useEffect(() => setAccentState(getAccent()), []);
   const opts = [
     { v: "light", label: "Light", icon: Sun, sw: "bg-[#F8FAFC]" },
     { v: "dark", label: "Dark", icon: Moon, sw: "bg-[#0F172A]" },
     { v: "system", label: "System", icon: Monitor, sw: "bg-gradient-to-r from-[#F8FAFC] from-50% to-[#0A0F1E] to-50%" },
   ];
   return (
-    <Section title="Giao diện" sub="Sáng · Tối · Theo hệ thống — lưu ngay trong trình duyệt.">
+    <Section title="Giao diện" sub="Sáng · Tối · Theo hệ thống — và màu nhấn riêng của bạn. Lưu ngay trong trình duyệt.">
       <div className="flex flex-col gap-2.5 sm:flex-row">
         {opts.map((o) => (
           <button
@@ -264,6 +267,36 @@ function ThemeCard() {
           </button>
         ))}
       </div>
+
+      <p className="mb-2 mt-4 text-[.74rem] font-bold uppercase tracking-wide text-muted">Màu nhấn (accent)</p>
+      <div className="flex flex-wrap items-center gap-2.5">
+        {ACCENTS.map((a) => (
+          <button
+            key={a.id}
+            type="button"
+            onClick={() => {
+              setAccent(a.id);
+              setAccentState(a.id);
+            }}
+            aria-label={`Chủ đề ${a.label}`}
+            className={cn(
+              "flex items-center gap-2 rounded-full border-[1.5px] py-1.5 pl-1.5 pr-3.5 text-[.8rem] font-bold transition hover:-translate-y-[2px] active:scale-95",
+              accent === a.id ? "border-teal text-ink" : "border-line text-muted hover:border-teal"
+            )}
+          >
+            <span
+              className="flex h-6 w-6 items-center justify-center rounded-full shadow-card"
+              style={{ background: `linear-gradient(135deg, ${a.swatch[0]}, ${a.swatch[1]})` }}
+            >
+              {accent === a.id ? <Check className="h-3.5 w-3.5 text-white" strokeWidth={3.2} /> : null}
+            </span>
+            {a.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2.5 text-[.78rem] text-muted">
+        Đổi là thấy ngay: nút, link, mục đang chọn, điểm nhấn — chỉ áp dụng trên máy bạn.
+      </p>
     </Section>
   );
 }

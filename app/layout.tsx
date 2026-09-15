@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: { default: SITE.title, template: `%s · ${SITE.name}` },
   description: SITE.description,
-  keywords: ["wishlist", "shopee", "tiktok shop", "danh sách mua sắm", "listcuathaovy"],
+  keywords: ["wishlist", "wishlist của thảo vy", "shopee", "tiktok shop", "danh sách mua sắm"],
   openGraph: {
     type: "website",
     locale: "vi_VN",
@@ -46,6 +46,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             tối ưu dấu tiếng Việt; offline build vẫn chạy, fallback system-ui. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* áp chủ đề accent đã lưu trước khi vẽ — không nháy màu */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{var a=localStorage.getItem('tv-accent');if(a&&a!=='cyan')document.documentElement.setAttribute('data-accent',a)}catch(e){}",
+          }}
+        />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"

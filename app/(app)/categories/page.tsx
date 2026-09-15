@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
-import { DEFAULT_CATEGORIES } from "@/lib/config";
 
 export default function CategoriesPage() {
   const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen } = useApp();
@@ -100,9 +99,22 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      <p className="text-xs text-muted">
-        Gợi ý: “Đồ cho phòng”, “Đồ học tập”, “Quà tặng” — {DEFAULT_CATEGORIES.length} danh mục mặc định đã có sẵn khi bạn tạo tài khoản.
-      </p>
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+        <span>Danh mục là của riêng bạn — tự tạo, tự đặt tên. Gợi ý bắt đầu:</span>
+        {["Đồ cho phòng", "Đồ học tập", "Quà tặng", "Công nghệ"].map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => {
+              setEditing(null); setName(s);
+              setCreating(true);
+            }}
+            className="rounded-full border border-line bg-surface px-2.5 py-1 font-semibold text-muted transition hover:border-teal hover:text-teal-ink active:scale-95 dark:hover:text-teal-200"
+          >
+            + {s}
+          </button>
+        ))}
+      </div>
 
       <Modal
         open={creating}

@@ -122,7 +122,7 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
                       setBellOpen(false);
                       setAddOpen(true);
                     }}
-                    className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-teal-soft px-3.5 py-1.5 text-[.76rem] font-extrabold text-teal-ink transition hover:brightness-95 active:scale-95 dark:bg-[#083344] dark:text-teal-200"
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-teal-soft px-3.5 py-1.5 text-[.76rem] font-extrabold text-teal-ink transition hover:brightness-95 active:scale-95 dark:bg-teal-950 dark:text-teal-200"
                   >
                     <Plus className="h-3.5 w-3.5" /> Lưu món đầu tiên
                   </button>

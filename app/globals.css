@@ -3,32 +3,67 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════
-   ProjectThaoVy — "Cyan Minimal" Design System (v5)
-   Nền xám trắng cực nhạt · mặt trắng · accent CYAN (chỉ điểm nhấn) ·
-   dark navy/charcoal · border mảnh · shadow rất nhẹ · Inter.
-   Minimal · Premium · Modern · Clean · Smart · Personal · Fast.
+   Wishlist của Thảo Vy — "Cyan Minimal" Design System (v6)
+   Nền trắng/xám rất nhạt · accent đổi theo CHỦ ĐỀ (5 màu, CSS vars) ·
+   dark navy/charcoal · border mảnh · shadow rất nhẹ · animation tinh tế.
    © _hngnguynn_
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-  --bg: 248 250 252;      /* Main background  #F8FAFC */
-  --surface: 255 255 255; /* Card             #FFFFFF */
-  --ink: 15 23 42;        /* Main text        #0F172A */
-  --muted: 100 116 139;   /* Secondary text   #64748B */
-  --line: 226 232 240;    /* Border           #E2E8F0 */
-  --focus-ring: 8 145 178 / 0.16;
+  --bg: 248 250 252;      /* #F8FAFC */
+  --surface: 255 255 255;
+  --ink: 15 23 42;        /* #0F172A */
+  --muted: 100 116 139;   /* #64748B */
+  --line: 226 232 240;    /* #E2E8F0 */
+
+  /* accent mặc định: CYAN */
+  --accent: 8 145 178;          /* -600: nền nút, active */
+  --accent-bright: 34 211 238;  /* -400: quầng sáng, glow */
+  --accent-deep: 14 116 144;    /* -700: hover sâu, gradient đáy */
+  --accent-ink: 14 116 144;     /* chữ accent trên nền nhạt */
+  --accent-soft: 229 246 251;   /* nền chip mềm */
+  --accent-softer: 232 245 250; /* nền khối lớn */
+  --accent-mist: 240 248 252;   /* hover rất nhạt */
+  --accent-200: 165 243 252;
+  --accent-300: 103 232 249;
+  --accent-950: 8 51 68;        /* nền chip dark */
 }
+
+/* ── Bộ chủ đề accent — chọn trong Cài đặt → Giao diện ─────────────── */
+[data-accent="iris"] {
+  --accent: 124 58 237; --accent-bright: 167 139 250; --accent-deep: 109 40 217;
+  --accent-ink: 109 40 217; --accent-soft: 245 243 255; --accent-softer: 237 233 254;
+  --accent-mist: 246 245 253; --accent-200: 221 214 254; --accent-300: 196 181 253;
+  --accent-950: 46 16 101;
+}
+[data-accent="rose"] {
+  --accent: 225 29 72; --accent-bright: 251 113 133; --accent-deep: 190 18 60;
+  --accent-ink: 190 18 60; --accent-soft: 255 241 242; --accent-softer: 255 241 242;
+  --accent-mist: 254 242 245; --accent-200: 254 205 211; --accent-300: 253 164 175;
+  --accent-950: 76 5 30;
+}
+[data-accent="emerald"] {
+  --accent: 16 185 129; --accent-bright: 52 211 153; --accent-deep: 5 150 105;
+  --accent-ink: 4 120 87; --accent-soft: 236 253 245; --accent-softer: 231 250 241;
+  --accent-mist: 240 253 244; --accent-200: 167 243 208; --accent-300: 110 231 183;
+  --accent-950: 2 44 34;
+}
+[data-accent="amber"] {
+  --accent: 217 119 6; --accent-bright: 245 158 11; --accent-deep: 180 83 9;
+  --accent-ink: 180 83 9; --accent-soft: 255 251 235; --accent-softer: 254 247 224;
+  --accent-mist: 255 251 240; --accent-200: 253 230 138; --accent-300: 252 211 77;
+  --accent-950: 69 26 3;
+}
+
 .dark {
   --bg: 10 15 30;         /* #0A0F1E — đêm navy */
   --surface: 17 27 45;    /* #111B2D */
-  --ink: 226 232 240;     /* #E2E8F0 */
-  --muted: 148 163 184;   /* #94A3B8 */
-  --line: 30 41 59;       /* #1E293B */
+  --ink: 226 232 240;
+  --muted: 148 163 184;
+  --line: 30 41 59;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -36,13 +71,13 @@ body {
   overflow-x: hidden;
 }
 ::selection {
-  background: #a5f3fc;
-  color: #0e7490;
+  background: rgb(var(--accent-200));
+  color: rgb(var(--accent-deep));
 }
 
 /* Focus rõ ràng cho điều hướng bàn phím */
 :focus-visible {
-  outline: 2px solid #0891b2;
+  outline: 2px solid rgb(var(--accent));
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -66,29 +101,39 @@ body {
     @apply cursor-pointer pr-8;
   }
 
-  /* Nút chính: cyan phẳng, một lớp bóng mờ nhẹ — minimal, không gradient kẹo */
+  /* Nút chính: accent gradient + vệt bóng chạy qua khi hover (sheen) */
   .btn-primary {
-    @apply font-bold transition duration-200;
-    background: linear-gradient(180deg, #0891b2 0%, #0e7490 100%);
+    @apply relative overflow-hidden font-bold transition duration-200;
+    background: linear-gradient(180deg, rgb(var(--accent)) 0%, rgb(var(--accent-deep)) 100%);
     color: #ffffff;
   }
-  .btn-primary:hover { filter: brightness(1.08); }
-  .btn-primary:active { filter: brightness(.95); transform: scale(0.98); }
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.26) 46%, transparent 62%);
+    transform: translateX(-130%);
+    transition: transform 0.55s ease;
+    pointer-events: none;
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:hover::after { transform: translateX(130%); }
+  .btn-primary:active { filter: brightness(0.95); transform: scale(0.98); }
 
   /* Container icon 40–44px bo tròn — chuẩn chung toàn app */
   .icon-box {
     @apply flex items-center justify-center rounded-[14px];
     width: 44px;
     height: 44px;
-    background: #e0f2f8;
-    color: #0891b2;
+    background: rgb(var(--accent-soft));
+    color: rgb(var(--accent));
   }
   .icon-box-sm {
     @apply flex items-center justify-center rounded-[12px];
     width: 40px;
     height: 40px;
-    background: #e0f2f8;
-    color: #0891b2;
+    background: rgb(var(--accent-soft));
+    color: rgb(var(--accent));
   }
 
   /* Nhãn nhận diện sàn THƯƠNG MẠI — màu hiệu thật, không phải accent UI */
@@ -97,7 +142,7 @@ body {
   .dark .mp-tiktok { background: #e6f2f2; color: #0f1c22; }
 }
 
-/* ── Animation system — 150–300ms, chỉ transform/opacity, không layout shift ── */
+/* ── Animation system — nhanh (150–300ms), chỉ transform/opacity ───── */
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: none; }
@@ -148,6 +193,32 @@ body {
 }
 .fav-pop { animation: fav-pop 0.28s ease-in-out both; }
 
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+.animate-floaty { animation: floaty 6s ease-in-out infinite; will-change: transform; }
+
+/* Quầng sáng hero trôi rất chậm — chiều sâu, không rối */
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-24px, 18px) scale(1.12); }
+  100% { transform: translate(18px, -12px) scale(0.96); }
+}
+.drift { animation: drift 16s ease-in-out infinite alternate; will-change: transform; }
+.drift-slow { animation: drift 22s ease-in-out infinite alternate-reverse; will-change: transform; }
+
+/* Empty state: minh họa thở nhẹ */
+@keyframes bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.03); }
+}
+.animate-bob { animation: bob 4.5s ease-in-out infinite; }
+
+/* Icon nhỏ trong chip: nghiêng vui khi hover card */
+.group:hover .chip-tilt { transform: rotate(-10deg) scale(1.1); }
+.chip-tilt { transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
 /* Hamburger morph Menu ⇄ X mượt (mobile menu) */
 .ham {
   position: relative;
@@ -170,7 +241,7 @@ body {
 .ham.is-open span:nth-child(1) { top: 18.5px; transform: rotate(45deg); }
 .ham.is-open span:nth-child(2) { top: 18.5px; transform: rotate(-45deg); }
 
-/* skeleton shimmer — dịu, không chói */
+/* skeleton shimmer — dịu, ánh theo accent */
 .shimmer {
   background: linear-gradient(
     100deg,
@@ -186,39 +257,33 @@ body {
   to { background-position: -200% 0; }
 }
 
-/* ── Lớp nền trang trí — sáng, thoáng, một quầng cyan rất nhẹ ───── */
-@keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-9px); }
-}
-.animate-floaty { animation: floaty 6s ease-in-out infinite; will-change: transform; }
-
+/* ── Nền trang trí theo accent ─────────────────────────────────────── */
 .hero-mint {
   background:
-    radial-gradient(620px 280px at 86% -12%, rgba(34, 211, 238, 0.10), transparent 60%),
-    radial-gradient(700px 320px at 4% 114%, rgba(8, 145, 178, 0.08), transparent 62%),
+    radial-gradient(620px 280px at 86% -12%, rgb(var(--accent-bright) / 0.10), transparent 60%),
+    radial-gradient(700px 320px at 4% 114%, rgb(var(--accent) / 0.08), transparent 62%),
     linear-gradient(180deg, #fdfeff 0%, #f4f8fb 60%, #f8fafc 100%);
 }
 .dark .hero-mint {
   background:
-    radial-gradient(620px 280px at 86% -12%, rgba(34, 211, 238, 0.10), transparent 60%),
-    radial-gradient(700px 320px at 4% 114%, rgba(8, 145, 178, 0.12), transparent 62%),
+    radial-gradient(620px 280px at 86% -12%, rgb(var(--accent-bright) / 0.10), transparent 60%),
+    radial-gradient(700px 320px at 4% 114%, rgb(var(--accent) / 0.12), transparent 62%),
     linear-gradient(180deg, #0d1830 0%, #0a0f1e 70%, #0b1224 100%);
 }
 .grad-soft {
-  background: linear-gradient(135deg, #f2f8fb 0%, #eaf5f9 55%, #f5fafc 100%);
+  background: linear-gradient(135deg, rgb(var(--accent-softer)) 0%, #f1f8fb 55%, #f5fafc 100%);
 }
 .dark .grad-soft {
   background: linear-gradient(135deg, #101c33 0%, #0d1628 60%, #0f1b31 100%);
 }
 .grad-text {
-  background: linear-gradient(120deg, #0e7490, #0891b2 55%, #22d3ee);
+  background: linear-gradient(120deg, rgb(var(--accent-deep)), rgb(var(--accent)) 55%, rgb(var(--accent-bright)));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* Câu quote nhận diện — nay là italic tinh tế, bỏ font viết tay */
+/* Câu quote nhận diện — italic thanh lịch */
 .hand {
   font-style: italic;
   font-weight: 600;

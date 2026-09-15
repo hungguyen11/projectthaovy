@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" className="flex items-center gap-2.5">
             <Logo size={40} />
             <span className="text-lg font-extrabold tracking-tight">
-              List<span className="font-medium text-muted">cuaThaoVy</span>
+              Wishlist<span className="font-medium text-muted"> của Thảo Vy</span>
             </span>
           </Link>
           <div>

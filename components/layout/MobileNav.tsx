@@ -37,7 +37,7 @@ export function MobileNav() {
                   it.active ? "text-teal" : "text-muted"
                 )}
               >
-                <span className={cn("flex h-7 w-full items-center justify-center rounded-[10px]", it.active && "bg-teal-soft dark:bg-[#083344]")}>
+                <span className={cn("flex h-7 w-full items-center justify-center rounded-[10px]", it.active && "bg-teal-soft dark:bg-teal-950")}>
                   <it.icon className="h-[20px] w-[20px]" />
                 </span>
                 {it.label}

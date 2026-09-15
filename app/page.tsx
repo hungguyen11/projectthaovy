@@ -19,7 +19,7 @@ export default function LandingPage() {
           <Link href="/" className="flex items-center gap-2.5">
             <Logo />
             <span className="text-[1.06rem] font-extrabold tracking-tight">
-              List<span className="font-medium text-muted">cuaThaoVy</span>
+              Wishlist<span className="font-medium text-muted"> của Thảo Vy</span>
             </span>
           </Link>
           <nav className="ml-3 hidden gap-5 text-sm font-medium text-muted sm:flex">
@@ -53,8 +53,8 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section className="hero-mint relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-32 right-[12%] h-[380px] w-[380px] rounded-full bg-aqua/20 blur-[80px]" />
-        <div className="pointer-events-none absolute bottom-[-120px] left-[6%] h-[320px] w-[320px] rounded-full bg-teal/15 blur-[70px]" />
+        <div className="drift pointer-events-none absolute -top-32 right-[12%] h-[380px] w-[380px] rounded-full bg-aqua/20 blur-[80px]" />
+        <div className="drift-slow pointer-events-none absolute bottom-[-120px] left-[6%] h-[320px] w-[320px] rounded-full bg-teal/15 blur-[70px]" />
         <div className="relative mx-auto grid max-w-[1200px] items-center gap-10 px-4 pb-20 pt-14 md:grid-cols-[1.05fr_.95fr] md:px-6 md:pt-16">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-[.78rem] font-semibold text-teal-ink shadow-card dark:text-teal-200">
@@ -90,7 +90,7 @@ export default function LandingPage() {
             <div className="animate-floaty rounded-[26px] border border-line bg-surface p-3.5 pb-4 shadow-pop">
               <div className="mx-auto mb-3 mt-1 h-[7px] w-[86px] rounded-full bg-line" />
               <div className="flex items-center gap-2 px-1 pb-2.5 text-[.8rem] font-bold">
-                <Logo size={22} /> List của Thảo Vy <b className="ml-auto font-normal text-muted">···</b>
+                <Logo size={22} /> Wishlist của Thảo Vy <b className="ml-auto font-normal text-muted">···</b>
               </div>
               <div className="mb-2.5 flex items-center gap-1.5 rounded-full border border-line bg-bg px-3 py-2 text-[.72rem] text-muted shadow-card"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg> Dán link Shopee · TikTok Shop…</div>
               <div className="mb-3 flex flex-wrap gap-1.5 text-[.66rem] font-semibold">
@@ -186,7 +186,7 @@ export default function LandingPage() {
           <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">
             Món đồ bạn thích đang chờ được <span className="grad-text">lưu lại</span>
           </h2>
-          <p className="hand max-w-[40ch] text-[1rem] text-[#0E7490] dark:text-teal-200">{SITE.motto}</p>
+          <p className="hand max-w-[40ch] text-[1rem] text-teal-ink dark:text-teal-200">{SITE.motto}</p>
           <Link
             href="/register"
             className="btn-primary mt-1 inline-flex items-center gap-2 rounded-[12px] px-7 py-3 text-base shadow-cta transition"
@@ -199,7 +199,7 @@ export default function LandingPage() {
       <footer className="border-t border-line bg-surface">
         <div className="mx-auto flex max-w-[1120px] flex-wrap items-center gap-4 px-4 py-6 md:px-6">
           <div className="flex items-center gap-2 text-sm text-muted">
-            <Logo size={30} /> <b className="text-ink">List</b>cuaThaoVy — <i>{SITE.tagline}</i>
+            <Logo size={30} /> <b className="text-ink">Wishlist</b> của Thảo Vy — <i>{SITE.tagline}</i>
           </div>
           <div className="ml-auto flex flex-wrap gap-2 text-[.74rem] font-semibold text-muted">
             {["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase", "PostgreSQL", "Vercel"].map((x) => (

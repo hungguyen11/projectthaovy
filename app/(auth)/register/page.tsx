@@ -76,7 +76,7 @@ export default function RegisterPage() {
       <div className="mb-6 flex items-center gap-2.5 md:hidden">
         <Logo size={34} />
         <span className="font-extrabold tracking-tight">
-          List<span className="font-medium text-muted">cuaThaoVy</span>
+          Wishlist<span className="font-medium text-muted"> của Thảo Vy</span>
         </span>
       </div>
       <h1 className="text-[1.5rem] font-extrabold tracking-tight">Tạo list của riêng bạn</h1>
@@ -159,7 +159,7 @@ export default function RegisterPage() {
               className="mt-0.5 h-4 w-4 accent-teal"
             />
             <span>
-              Tôi hiểu <b>List của Thảo Vy không bán hàng</b> — đây là kho lưu wishlist cá nhân, dữ liệu chỉ mình tôi thấy
+              Tôi hiểu <b>Wishlist của Thảo Vy không bán hàng</b> — đây là kho lưu wishlist cá nhân, dữ liệu chỉ mình tôi thấy
               và không bao giờ hiển thị công khai.
             </span>
           </label>

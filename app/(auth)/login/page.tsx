@@ -57,7 +57,7 @@ export default function LoginPage() {
       <div className="mb-6 flex items-center gap-2.5 md:hidden">
         <Logo size={34} />
         <span className="font-extrabold tracking-tight">
-          List<span className="font-medium text-muted">cuaThaoVy</span>
+          Wishlist<span className="font-medium text-muted"> của Thảo Vy</span>
         </span>
       </div>
       <h1 className="text-[1.5rem] font-extrabold tracking-tight">Chào mừng bạn quay lại</h1>

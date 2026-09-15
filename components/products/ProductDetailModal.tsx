@@ -12,7 +12,7 @@ import type { Product, ProductStatus } from "@/types";
 
 /**
  * "Chi tiết sản phẩm" theo mock: ảnh lớn bên trái, thông tin bên phải
- * (tên · giá san hô · pill trạng thái · hộp "Thông tin sản phẩm"),
+ * (tên · giá · pill trạng thái · hộp "Thông tin sản phẩm"),
  * hành động: Mua ngay / Đánh dấu đã mua / Xóa + đổi trạng thái.
  */
 export function ProductDetailModal() {

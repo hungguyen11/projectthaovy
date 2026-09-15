@@ -40,7 +40,7 @@ export function NavItem({
       className={cn(
         "flex w-full items-center gap-2.5 rounded-[12px] px-3 py-[9px] text-[.875rem] font-medium text-muted transition",
         "hover:bg-aqua-mist hover:text-ink dark:hover:bg-[#1E293B]",
-        active && "bg-teal-soft font-bold text-teal-ink dark:bg-[#083344] dark:text-teal-200"
+        active && "bg-teal-soft font-bold text-teal-ink dark:bg-teal-950 dark:text-teal-200"
       )}
     >
       <Icon className={cn("h-[18px] w-[18px]", active && "text-teal dark:text-teal-300")} />
@@ -72,7 +72,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onNavigate}>
           <Logo size={38} />
           <span className="text-[1.06rem] font-extrabold tracking-tight">
-            List<span className="font-medium text-muted">cuaThaoVy</span>
+            Wishlist<span className="font-medium text-muted"> của Thảo Vy</span>
           </span>
         </Link>
       </div>

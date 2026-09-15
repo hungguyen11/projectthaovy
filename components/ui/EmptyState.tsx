@@ -16,7 +16,7 @@ export function EmptyState({
   const { setAddOpen } = useApp();
   return (
     <div className="flex flex-col items-center gap-3 rounded-card border-[1.5px] border-dashed border-line bg-surface/50 px-6 py-14 text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-line grad-soft">
+      <span className="animate-bob flex h-16 w-16 items-center justify-center rounded-[22px] border border-line grad-soft">
         <ShoppingBag className="h-7 w-7 text-teal-deep dark:text-teal" />
       </span>
       <h3 className="text-[1.05rem] font-extrabold">{title}</h3>
