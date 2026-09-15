@@ -31,6 +31,7 @@ export function AddProductModal() {
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState<ProductStatus>("PENDING");
   const [manualPrice, setManualPrice] = useState("");
+  const [manualTitle, setManualTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const fetchId = useRef(0);
 
@@ -42,6 +43,7 @@ export function AddProductModal() {
     setMeta(null);
     setStatus("PENDING");
     setManualPrice("");
+    setManualTitle("");
     setSaving(false);
   }, []);
 
@@ -92,7 +94,7 @@ export function AddProductModal() {
   const manualParsed = parseVndFlexible(manualPrice);
   const manualMode = !meta && phase === "error";
   const metaLacksPrice = !!meta && meta.price == null && !meta.price_label;
-  const canSave = meta ? phase === "done" : manualMode && manualParsed != null;
+  const canSave = meta ? phase === "done" : manualMode && (manualParsed != null || manualTitle.trim().length >= 2);
 
   const save = async () => {
     if (!canSave || saving) return;
@@ -105,7 +107,7 @@ export function AddProductModal() {
       status,
       snapshot: {
         image: meta?.image ?? null,
-        title: meta?.title ?? "",
+        title: meta?.title || manualTitle.trim(),
         price,
         price_label: priceLabel,
         marketplace: meta?.marketplace,
@@ -211,9 +213,15 @@ export function AddProductModal() {
           </p>
           <div className="mt-3 rounded-xl border border-line bg-surface p-3">
             <p className="flex items-center gap-1.5 text-[.82rem] font-extrabold text-ink">
-              <PencilLine className="h-4 w-4" /> Tự nhập giá (VND)
+              <PencilLine className="h-4 w-4" /> Tự nhập tên & giá
             </p>
-            <p className="mt-0.5 text-[.74rem] text-muted">Chỉ cần giá — ảnh và tên sẽ dùng ảnh mặc định của app.</p>
+            <p className="mt-0.5 text-[.74rem] text-muted">Điền giá là đủ lưu được; thêm tên (không bắt buộc) để thẻ đẹp hơn — ảnh dùng mặc định của app.</p>
+            <input
+              className="input-field mt-2"
+              placeholder="Tên sản phẩm (không bắt buộc) — VD: Mũ lưỡi trai Tim và friends"
+              value={manualTitle}
+              onChange={(e) => setManualTitle(e.target.value)}
+            />
             <input
               className="input-field mt-2 max-w-[240px]"
               placeholder="VD: 399.000 hoặc 399k"

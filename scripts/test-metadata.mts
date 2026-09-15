@@ -4,6 +4,8 @@
  */
 import assert from "node:assert/strict";
 import { parseMetadata, parsePriceString } from "../lib/metadata/parse";
+import { parseShopee, parseTikTok, titleFromSlug, extractFirstUrl, isShortLink } from "../lib/metadata/link";
+import { extractPrices, parseRss } from "../lib/metadata/serp";
 import { isPrivateIp, isBlockedHostname, validateUrl, assertPublicDns, SsrfError } from "../lib/metadata/ssrf";
 
 let n = 0;
@@ -140,6 +142,79 @@ await ok(
     assert.equal(isBlockedHostname("foo.internal"), true);
     assert.equal(isBlockedHostname("127.0.0.1"), true);
     assert.equal(isBlockedHostname("shopee.vn"), false);
+  }
+)();
+
+/* ── định dạng link sàn (offline) ── */
+await ok(
+  "parseShopee — mọi định dạng",
+  () => {
+    const U = (s: string) => new URL(s);
+    const a = parseShopee(U("https://shopee.vn/product/176103579/11446449426?uls_trackid=x"));
+    assert.equal(a?.shopId, "176103579");
+    assert.equal(a?.itemId, "11446449426");
+    const b = parseShopee(U("https://shopee.vn/MŨ-LƯỠI-TRAI-TIM-VÀ-FRIENDS-i.176103579.11446449426"));
+    assert.equal(b?.itemId, "11446449426");
+    assert.equal(titleFromSlug(b?.slug || ""), "MŨ LƯỠI TRAI TIM VÀ FRIENDS");
+    const c = parseShopee(U("https://shopee.vn/i.176103579.11446449426"));
+    assert.equal(c?.shopId, "176103579");
+    const d = parseShopee(U("https://shopee.vn/i/176103579/11446449426"));
+    assert.equal(d?.itemId, "11446449426");
+    const e = parseShopee(U("https://shopee.vn/product?itemId=11446449426&shopId=176103579"));
+    assert.equal(e?.itemId, "11446449426");
+    const f = parseShopee(U("https://shopee.vn/product?item_id=11446449426&shop_id=176103579"));
+    assert.equal(f?.shopId, "176103579");
+    assert.equal(parseShopee(U("https://lazada.vn/hang-a-i.999.888.html")), null);
+  }
+)();
+
+await ok(
+  "parseTikTok — view/product/object_id",
+  () => {
+    const U = (s: string) => new URL(s);
+    assert.equal(parseTikTok(U("https://shop.tiktok.com/view/product/1729419835240539605"))?.productId, "1729419835240539605");
+    assert.equal(parseTikTok(U("https://www.tiktok.com/shop/p/1729419835240539605"))?.productId, "1729419835240539605");
+    assert.equal(parseTikTok(U("https://www.tiktok.com/shop/product/view?object_id=1731115696550020038&region=VN"))?.productId, "1731115696550020038");
+    assert.equal(parseTikTok(U("https://shopee.vn/product/1/2")), null);
+  }
+)();
+
+await ok(
+  "extractFirstUrl + isShortLink",
+  () => {
+    const share = "Siêu Sale 9.9 MŨ LƯỠI TRAI i.176103579.11446449426 https://s.shopee.vn/8UdlYhZ0d6 hãy mua đi";
+    assert.equal(extractFirstUrl(share), "https://s.shopee.vn/8UdlYhZ0d6");
+    assert.equal(isShortLink(new URL("https://s.shopee.vn/8UdlYhZ0d6")), true);
+    assert.equal(isShortLink(new URL("https://vt.tiktok.com/ZSxABC123/")), true);
+    assert.equal(isShortLink(new URL("https://shopee.vn/product/1/2")), false);
+    assert.equal(extractFirstUrl("không có link gì ở đây"), null);
+  }
+)();
+
+await ok(
+  "extractPrices — dạng giá Việt Nam",
+  () => {
+    assert.equal(extractPrices("Giá chỉ 129.000₫ giảm 34%").price, 129000);
+    assert.equal(extractPrices("299.000đ – 499.000đ").price, 299000);
+    assert.equal(extractPrices("shop bán 1.290.000 đồng mỗi cái").price, 1290000);
+    assert.equal(extractPrices("999 người đã bán").price, null); // dưới ngưỡng hàng thật
+    assert.equal(extractPrices("mã 1234567 thường").price, null); // không có đơn vị
+  }
+)();
+
+await ok(
+  "parseRss — Bing RSS fixture",
+  () => {
+    const xml = `<?xml version="1.0"?><rss><channel>
+      <item><title>MŨ LƯỠI TRAI NAM CAO CẤP | Shopee Việt Nam</title><link>https://shopee.vn/MU-i.1.2</link><description>Giá chỉ 129.000₫ freeship toàn quốc</description></item>
+      <item><title>tin linh tinh</title><description>không giá</description></item>
+    </channel></rss>`;
+    const hits = parseRss(xml);
+    assert.equal(hits.length, 2);
+    assert.equal(hits[0].title, "MŨ LƯỠI TRAI NAM CAO CẤP");
+    assert.equal(hits[0].price, 129000);
+    assert.equal(hits[1].price, null);
+    assert.equal(parseRss("<rss>hổng có item</rss>").length, 0);
   }
 )();
 

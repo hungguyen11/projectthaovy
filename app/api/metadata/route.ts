@@ -4,12 +4,13 @@ import { fetchMetadata } from "@/lib/metadata/service";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs"; // cần node:dns cho SSRF guard
+export const maxDuration = 30; // trang sàn chậm + vòng tìm giá dự phòng — cần qtime này trên Vercel
 
 /**
  * POST /api/metadata  { url }
  * Trả về: { ok:true, data:{ image,title,price,price_label,marketplace,source_url } }
  *      hoặc { ok:false, code, message }  — client hiển thị "Thử lại".
- * Timeout 12s, cache 5 phút, rate-limit theo user+IP, chống SSRF.
+ * Cache 5 phút, rate-limit theo user+IP, chống SSRF, hỗ trợ link rút gọn/share text/slug.
  */
 async function __POST(request: NextRequest) {
   let s;
