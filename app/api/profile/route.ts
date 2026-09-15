@@ -1,13 +1,16 @@
 import { requireUser, jsonError, route } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AUTH_EMAIL_DOMAIN } from "@/lib/auth-email";
 import type { Profile } from "@/types";
 
 export const runtime = "nodejs";
 
-/** GET /api/profile */
+/** GET /api/profile — khách (chưa đăng nhập) nhận { profile: null }, không lỗi. */
 async function __GET() {
-  const { supabase, user } = await requireUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return Response.json({ profile: null }, { headers: { "Cache-Control": "no-store" } });
   const { data, error } = await supabase
     .from("profiles")
     .select("*")

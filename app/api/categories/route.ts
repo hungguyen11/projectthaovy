@@ -1,14 +1,15 @@
-import { requireUser, jsonError, route } from "@/lib/session";
+import { requireAdmin, jsonError, route } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 /** GET /api/categories */
 async function __GET() {
-  const { supabase, user } = await requireUser();
+  // PUBLIC: danh mục của Admin cho phép khách xem để hiểu cách sắp xếp list.
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
     .select("*")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: true })
     .limit(200);
   if (error) return jsonError(500, "DB", "Không thể tải danh mục. Vui lòng thử lại.");
@@ -17,7 +18,7 @@ async function __GET() {
 
 /** POST /api/categories { name } */
 async function __POST(request: Request) {
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireAdmin();
   let body: Record<string, unknown>;
   try {
     body = (await request.json()) as Record<string, unknown>;

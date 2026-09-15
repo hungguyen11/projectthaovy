@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireUser, jsonError, route } from "@/lib/session";
+import { requireAdmin, jsonError, route } from "@/lib/session";
 import type { ProductStatus } from "@/types";
 
 export const runtime = "nodejs";
@@ -8,7 +8,7 @@ const STATUSES: ProductStatus[] = ["PENDING", "PRIORITY", "FAVORITE", "PURCHASED
 
 /** PATCH /api/products/:id — CHỈ được đổi status / category_id (metadata là READ-ONLY). */
 async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const { supabase, user } = await requireUser();
+  const { supabase } = await requireAdmin();
   const { id } = await ctx.params;
   if (!id) return jsonError(400, "BAD_ID", "ID sản phẩm không hợp lệ.");
 
@@ -34,7 +34,6 @@ async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string
     .from("products")
     .update(patch)
     .eq("id", id)
-    .eq("user_id", user.id)
     .select("*, category:categories(id,name)")
     .maybeSingle();
 
@@ -45,12 +44,11 @@ async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string
 
 /** DELETE /api/products/:id — xóa THẬT khỏi database (không soft-delete). */
 async function __DELETE(_request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const { supabase, user, role } = await requireUser();
+  const { supabase } = await requireAdmin();
   const { id } = await ctx.params;
   if (!id) return jsonError(400, "BAD_ID", "ID sản phẩm không hợp lệ.");
 
-  const chain = supabase.from("products").delete().eq("id", id);
-  const { data, error } = await (role === "ADMIN" ? chain : chain.eq("user_id", user.id)).select("id");
+  const { data, error } = await supabase.from("products").delete().eq("id", id).select("id");
 
   if (error) return jsonError(500, "DB", "Không thể xóa sản phẩm. Vui lòng thử lại.");
   if (!data?.length) return jsonError(404, "NOT_FOUND", "Không tìm thấy sản phẩm.");

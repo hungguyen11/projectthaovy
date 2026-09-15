@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { requireUser, jsonError, route } from "@/lib/session";
+import { requireAdmin, jsonError, route } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
 import { validateUrl } from "@/lib/metadata/ssrf";
 import { detectMarketplace } from "@/lib/config";
 import { normalizeUrl } from "@/lib/utils";
@@ -9,15 +10,15 @@ export const runtime = "nodejs";
 
 const STATUSES: ProductStatus[] = ["PENDING", "PRIORITY", "FAVORITE", "PURCHASED"];
 
-/** GET /api/products?status=&category=&q=&sort=  — chỉ dữ liệu của chính user (RLS). */
+/** GET /api/products — PUBLIC: toàn bộ sản phẩm do Admin quản lý, ai cũng xem được. */
 async function __GET(request: NextRequest) {
-  const { supabase, user } = await requireUser();
+  // CHẾ ĐỘ CÔNG KHAI: ai cũng đọc được list của Admin (không cần đăng nhập).
+  const supabase = await createClient();
   const sp = request.nextUrl.searchParams;
 
   let query = supabase
     .from("products")
     .select("*, category:categories(id,name)")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(500);
 
@@ -43,7 +44,7 @@ async function __GET(request: NextRequest) {
  * Duplicate URL → 409 { code: 'DUPLICATE', product }.
  */
 async function __POST(request: NextRequest) {
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireAdmin();
 
   let body: Record<string, unknown>;
   try {

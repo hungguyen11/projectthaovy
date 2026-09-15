@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { CalendarDays, CheckCircle2, Clock, CreditCard, LogOut, Mail, ShieldCheck, User as UserIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useApp } from "@/components/providers/AppProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 
@@ -10,8 +12,12 @@ import { useToast } from "@/components/providers/ToastProvider";
  * hồ sơ gọn — avatar, tên, @username, số liệu của chính bạn, lối tắt.
  */
 export default function AccountPage() {
-  const { profile, stats } = useApp();
+  const { profile, stats, loading } = useApp();
   const toast = useToast();
+  const router = useRouter();
+  useEffect(() => {
+    if (!loading && profile?.role !== "ADMIN") router.replace("/dashboard"); // trang hồ sơ — chỉ Admin
+  }, [loading, profile, router]);
   const name = profile?.display_name || profile?.username || "Bạn";
   const initial = name.slice(0, 1).toUpperCase();
 

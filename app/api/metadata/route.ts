@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireUser, jsonError, route } from "@/lib/session";
+import { requireAdmin, jsonError, route } from "@/lib/session";
 import { fetchMetadata } from "@/lib/metadata/service";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -15,7 +15,7 @@ export const maxDuration = 30; // trang sàn chậm + vòng tìm giá dự phòn
 async function __POST(request: NextRequest) {
   let s;
   try {
-    s = await requireUser();
+    s = await requireAdmin();
   } catch (e) {
     const err = e as { status?: number; code?: string; message?: string };
     return jsonError(err.status ?? 401, err.code ?? "UNAUTHORIZED", err.message ?? "Vui lòng đăng nhập.");

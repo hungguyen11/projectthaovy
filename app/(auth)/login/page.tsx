@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/layout/Logo";
 import { ConfigNotice } from "@/components/ConfigNotice";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { api } from "@/lib/api-client";
 import { toAuthEmail } from "@/lib/auth-email";
 import { SITE } from "@/lib/config";
 
@@ -40,6 +41,18 @@ export default function LoginPage() {
         return;
       }
       if (data.session) {
+        // chỉ ADMIN mới được vào khu quản trị — web public, khách không cần tài khoản
+        let me: { profile?: { role?: string } | null } = {};
+        try {
+          me = await api<{ profile: { role?: string } | null }>("/api/profile");
+        } catch {
+          me = {};
+        }
+        if (me.profile?.role !== "ADMIN") {
+          await supabase.auth.signOut();
+          setError("Tài khoản này không có quyền quản trị. Trang web đang ở chế độ công khai — bạn cứ vào xem và nhấn yêu thích, không cần đăng nhập.");
+          return;
+        }
         router.push("/dashboard");
         router.refresh();
       } else {
@@ -60,8 +73,8 @@ export default function LoginPage() {
           Wishlist<span className="font-medium text-muted"> của Thảo Vy</span>
         </span>
       </div>
-      <h1 className="text-[1.5rem] font-extrabold tracking-tight">Chào mừng bạn quay lại</h1>
-      <p className="mt-1 text-sm text-muted">Đăng nhập để xem “những món đồ bạn muốn mua”.</p>
+      <h1 className="text-[1.5rem] font-extrabold tracking-tight">Khu vực quản trị</h1>
+      <p className="mt-1 text-sm text-muted">Chỉ <b>Admin</b> đăng nhập để gắn link, sắp xếp danh mục và quản lý trang. Người xem không cần tài khoản.</p>
 
       {!configured ? <ConfigNotice className="mt-5" /> : null}
 
@@ -75,7 +88,7 @@ export default function LoginPage() {
             className="input-field"
             value={login}
             onChange={(e) => setLogin(e.target.value)}
-            placeholder="manhhung / thaovy"
+            placeholder="manhhung"
             autoComplete="username"
             required
             disabled={!configured || busy}
@@ -119,10 +132,9 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-5 text-center text-sm text-muted">
-        Chưa có tài khoản?{" "}
-        <Link href="/register" className="font-bold text-teal-ink underline decoration-dotted dark:text-teal-200">
-          Tạo list miễn phí
+      <p className="mt-5 text-center text-sm">
+        <Link href="/dashboard" className="font-bold text-teal-ink underline decoration-dotted dark:text-teal-200">
+          ← Về trang wishlist (không cần đăng nhập)
         </Link>
       </p>
       <p className="mt-1 text-center text-[.72rem] text-muted/80">{SITE.brand} — không bán hàng, chỉ lưu điều bạn muốn mua.</p>

@@ -1,4 +1,4 @@
-import { requireUser, jsonError, route } from "@/lib/session";
+import { requireAdmin, jsonError, route } from "@/lib/session";
 import { extractLinks, MAX_LINKS } from "@/lib/extract-links";
 
 export const runtime = "nodejs";
@@ -12,7 +12,7 @@ const MAX_BYTES = 2.5 * 1024 * 1024; // file 2.5MB đổ lại
  * KHÔNG chạm DB — client sẽ lần lượt gửi từng link qua /api/metadata + /api/products.
  */
 async function __POST(request: Request) {
-  await requireUser();
+  await requireAdmin();
   let body: { name?: unknown; data_b64?: unknown };
   try {
     body = (await request.json()) as typeof body;

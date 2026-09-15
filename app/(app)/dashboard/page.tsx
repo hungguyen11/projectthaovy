@@ -13,7 +13,7 @@ import { ProductCard } from "@/components/products/ProductCard";
  * Toàn bộ logic dữ liệu dùng qua useApp, không đổi.
  */
 export default function DashboardPage() {
-  const { profile, stats, loading, error, products, setAddOpen, setBulkOpen, refreshAll } = useApp();
+  const { profile, stats, loading, error, products, setAddOpen, setBulkOpen, refreshAll, isAdmin } = useApp();
   const name = profile?.display_name || profile?.username || "bạn";
 
   const chips = [
@@ -34,18 +34,20 @@ export default function DashboardPage() {
           </h1>
           <p className="mt-0.5 text-[.95rem] font-semibold text-muted">Bạn đang muốn mua gì hôm nay?</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button className="rounded-full px-4" variant="soft" onClick={() => setBulkOpen(true)}>
-            <FileSpreadsheet className="h-4 w-4" /> Nhập hàng loạt
-          </Button>
-          <Button className="rounded-full px-5" onClick={() => setAddOpen(true)}>
-            <Plus className="h-4 w-4" /> Thêm sản phẩm
-          </Button>
-        </div>
+        {isAdmin ? (
+          <div className="flex items-center gap-2">
+            <Button className="rounded-full px-4" variant="soft" onClick={() => setBulkOpen(true)}>
+              <FileSpreadsheet className="h-4 w-4" /> Nhập hàng loạt
+            </Button>
+            <Button className="rounded-full px-5" onClick={() => setAddOpen(true)}>
+              <Plus className="h-4 w-4" /> Thêm sản phẩm
+            </Button>
+          </div>
+        ) : null}
       </section>
 
       {/* ── thống kê nhỏ — một hàng chip, bấm là lọc ── */}
-      <section className="rise-in flex flex-wrap gap-2.5" aria-label="Thống kê danh sách" style={{ animationDelay: "60ms" }}>
+      <section className="no-scrollbar rise-in -mx-3.5 flex gap-2.5 overflow-x-auto px-3.5 pb-0.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" aria-label="Thống kê danh sách" style={{ animationDelay: "60ms" }}>
         {chips.map((c) => (
           <Link
             key={c.key}
@@ -76,14 +78,14 @@ export default function DashboardPage() {
               Xem tất cả <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5">
             {products.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
             ))}
           </div>
         </section>
       ) : error ? null : loading ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="aspect-[3/4.1] rounded-card border border-line bg-surface p-2 shadow-card">
               <div className="shimmer h-full w-full rounded-[12px]" />
@@ -93,7 +95,12 @@ export default function DashboardPage() {
       ) : (
         <EmptyState
           title="Chưa có sản phẩm nào"
-          message="Thêm từng link hoặc dùng “Nhập hàng loạt” từ file Excel — mỗi dòng một link, web tự lấy thông tin."
+          message={
+            isAdmin
+              ? "Thêm từng link hoặc dùng “Nhập hàng loạt” từ file Excel — mỗi dòng một link, web tự lấy thông tin."
+              : "Admin sẽ sớm cập nhật những món đồ đáng yêu tại đây ♥"
+          }
+          cta={isAdmin}
         />
       )}
     </div>

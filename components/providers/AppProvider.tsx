@@ -42,6 +42,10 @@ interface AppCtx {
   renameCategory: (id: string, name: string) => Promise<boolean>;
   deleteCategory: (id: string) => Promise<boolean>;
 
+  isAdmin: boolean;
+  guestFavs: Set<string>;
+  toggleGuestFav: (id: string) => void;
+
   addOpen: boolean;
   setAddOpen: (v: boolean) => void;
   bulkOpen: boolean;
@@ -68,6 +72,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+
+  const isAdmin = profile?.role === "ADMIN";
+
+  // khách không tài khoản → tim ♥ lưu ngay trên máy người xem (localStorage), không đụng DB
+  const [guestFavs, setGuestFavs] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      return new Set(JSON.parse(window.localStorage.getItem("tv-guest-favs") ?? "[]") as string[]);
+    } catch {
+      return new Set();
+    }
+  });
+  const toggleGuestFav = useCallback((id: string) => {
+    setGuestFavs((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try {
+        window.localStorage.setItem("tv-guest-favs", JSON.stringify([...next]));
+      } catch { /* private mode */ }
+      return next;
+    });
+  }, []);
 
   const [addOpen, setAddOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -210,6 +237,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       query, setQuery,
       refreshAll, addProduct, patchProduct, deleteProduct,
       createCategory, renameCategory, deleteCategory,
+      isAdmin, guestFavs, toggleGuestFav,
       addOpen, setAddOpen, bulkOpen, setBulkOpen, detailProduct, setDetailProduct, stats,
     }),
     [
@@ -217,6 +245,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       query,
       refreshAll, addProduct, patchProduct, deleteProduct,
       createCategory, renameCategory, deleteCategory,
+      isAdmin, guestFavs,
       addOpen, bulkOpen, detailProduct, stats,
     ]
   );

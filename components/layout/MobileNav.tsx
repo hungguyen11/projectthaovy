@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Heart, Home, LayoutGrid, Plus, User } from "lucide-react";
+import { Heart, Home, KeyRound, LayoutGrid, Plus, Tags, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/components/providers/AppProvider";
 
@@ -13,14 +13,16 @@ import { useApp } from "@/components/providers/AppProvider";
 export function MobileNav() {
   const pathname = usePathname();
   const status = useSearchParams().get("status");
-  const { setAddOpen } = useApp();
+  const { setAddOpen, isAdmin } = useApp();
 
   const items = [
     { href: "/dashboard", label: "Trang chủ", icon: Home, active: pathname === "/dashboard" },
     { href: "/products", label: "Sản phẩm", icon: LayoutGrid, active: pathname === "/products" && !status },
-    null, // chỗ trống cho FAB
+    null, // chỗ trung tâm: FAB thêm (admin) / ADMIN (khách)
     { href: "/products?status=FAVORITE", label: "Yêu thích", icon: Heart, active: pathname === "/products" && status === "FAVORITE" },
-    { href: "/account", label: "Tài khoản", icon: User, active: pathname === "/account" || pathname === "/settings" },
+    isAdmin
+      ? { href: "/account", label: "Tài khoản", icon: User, active: pathname === "/account" || pathname === "/settings" }
+      : { href: "/categories", label: "Danh mục", icon: Tags, active: pathname === "/categories" },
   ];
 
   return (
@@ -46,13 +48,23 @@ export function MobileNav() {
               <span key={`sp-${i}`} aria-hidden />
             )
           )}
-          <button
-            onClick={() => setAddOpen(true)}
-            aria-label="Thêm sản phẩm"
-            className="btn-primary absolute left-1/2 top-[-26px] flex h-[58px] w-[58px] -translate-x-1/2 items-center justify-center rounded-full border-[4px] border-bg text-white shadow-cta transition active:scale-95"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
+          {isAdmin ? (
+            <button
+              onClick={() => setAddOpen(true)}
+              aria-label="Thêm sản phẩm"
+              className="btn-primary absolute left-1/2 top-[-26px] flex h-[58px] w-[58px] -translate-x-1/2 items-center justify-center rounded-full border-[4px] border-bg text-white shadow-cta transition active:scale-95"
+            >
+              <Plus className="h-6 w-6" />
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              aria-label="Đăng nhập Admin"
+              className="btn-primary absolute left-1/2 top-[-18px] flex h-[48px] w-[48px] -translate-x-1/2 flex-col items-center justify-center gap-0.5 rounded-full border-[4px] border-bg text-white shadow-cta transition active:scale-95"
+            >
+              <KeyRound className="h-5 w-5" />
+            </Link>
+          )}
         </div>
       </nav>
     </>

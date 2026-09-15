@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
+  KeyRound,
   LayoutDashboard,
   List,
   Tags,
@@ -62,7 +63,7 @@ function useActive() {
 }
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
-  const { profile } = useApp();
+  const { profile, isAdmin } = useApp();
   const isActive = useActive();
   const toast = useToast();
 
@@ -81,21 +82,37 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <NavItem href="/dashboard" icon={LayoutDashboard} label="Tổng quan" active={isActive("/dashboard")} onClick={onNavigate} />
         <NavItem href="/products" icon={List} label="Tất cả sản phẩm" active={isActive("/products")} onClick={onNavigate} />
         <NavItem href="/categories" icon={Tags} label="Danh mục" active={isActive("/categories")} onClick={onNavigate} />
-        <NavItem href="/settings" icon={Settings} label="Cài đặt" active={isActive("/settings")} onClick={onNavigate} />
-        <NavItem href="/account" icon={User} label="Tài khoản" active={isActive("/account")} onClick={onNavigate} />
-        {profile?.role === "ADMIN" ? (
-          <NavItem href="/admin" icon={Shield} label="Quản trị" active={isActive("/admin")} onClick={onNavigate} />
-        ) : null}
+        {isAdmin ? (
+          <>
+            <NavItem href="/settings" icon={Settings} label="Cài đặt" active={isActive("/settings")} onClick={onNavigate} />
+            <NavItem href="/account" icon={User} label="Tài khoản" active={isActive("/account")} onClick={onNavigate} />
+            <NavItem href="/admin" icon={Shield} label="Quản trị" active={isActive("/admin")} onClick={onNavigate} />
 
-        <form action="/api/auth/signout" method="post" onSubmit={() => toast("info", "Đang đăng xuất…")}>
-          <button
-            type="submit"
-            className="flex w-full items-center gap-2.5 rounded-[12px] px-3 py-[9px] text-[.875rem] font-medium text-muted transition hover:bg-rose-soft hover:text-red-600 dark:hover:bg-[#3F1D2B]"
-          >
-            <LogOut className="h-[18px] w-[18px]" />
-            <span>Đăng xuất</span>
-          </button>
-        </form>
+            <form action="/api/auth/signout" method="post" onSubmit={() => toast("info", "Đang đăng xuất…")}>
+              <button
+                type="submit"
+                className="flex w-full items-center gap-2.5 rounded-[12px] px-3 py-[9px] text-[.875rem] font-medium text-muted transition hover:bg-rose-soft hover:text-red-600 dark:hover:bg-[#3F1D2B]"
+              >
+                <LogOut className="h-[18px] w-[18px]" />
+                <span>Đăng xuất</span>
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="pop-in mt-2 rounded-[16px] border border-line bg-bg/70 p-3 text-center">
+            <p className="text-[.74rem] font-semibold text-muted">
+              Xem thoải mái — thích thì bấm ♥ và “Mua ngay”.
+            </p>
+            <Link
+              href="/login"
+              onClick={onNavigate}
+              className="btn-primary mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-[12px] px-4 py-2.5 text-[.86rem] font-extrabold text-white shadow-cta transition hover:brightness-105 active:scale-[.98]"
+            >
+              <KeyRound className="h-4 w-4" /> ADMIN
+            </Link>
+            <p className="mt-1.5 text-[.66rem] font-semibold text-muted/80">Chỉ Admin đăng nhập để quản lý trang.</p>
+          </div>
+        )}
       </nav>
     </div>
   );

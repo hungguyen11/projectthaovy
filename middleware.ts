@@ -1,16 +1,11 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = [
-  "/dashboard",
-  "/products",
-  "/categories",
-  "/budget",
-  "/settings",
-  "/admin",
-];
+// Chế độ PUBLIC: /dashboard · /products · /categories ai cũng xem được (không cần tài khoản).
+// Chỉ khu quản trị cần đăng nhập (role ADMIN được kiểm tra lại ở API).
+const PROTECTED = ["/settings", "/account", "/admin"];
 
-const AUTH_PAGES = ["/login", "/register"];
+const AUTH_PAGES = ["/login"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -44,6 +39,13 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
+  // /register không còn tồn tại (web công khai, không mở tài khoản mới)
+  if (path === "/register") {
+    const toLogin = request.nextUrl.clone();
+    toLogin.pathname = "/login";
+    toLogin.search = "";
+    return NextResponse.redirect(toLogin);
+  }
   const isProtected = PROTECTED.some((p) => path === p || path.startsWith(`${p}/`));
 
   if (isProtected && !user) {

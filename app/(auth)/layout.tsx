@@ -19,13 +19,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </Link>
           <div>
             <h2 className="text-[1.7rem] font-extrabold leading-tight tracking-tight">
-              Lưu những điều
+              Khu vực
               <br />
-              <span className="grad-text">bạn muốn mua.</span>
+              <span className="grad-text">dành cho Admin.</span>
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              Dán link sản phẩm từ Shopee, TikTok Shop… Hệ thống tự lấy ảnh, tên và giá.
-              Bạn chỉ cần chọn danh mục, chọn trạng thái và lưu.
+              Trang web công khai — ai cũng xem được. Chỉ Admin đăng nhập để gắn link,
+              cập nhật ảnh/tên/giá và quản lý danh mục.
             </p>
           </div>
           <p className="text-xs italic text-muted">“{SITE.motto}” ♥</p>

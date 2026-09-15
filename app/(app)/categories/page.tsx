@@ -10,7 +10,7 @@ import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
 
 export default function CategoriesPage() {
-  const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen } = useApp();
+  const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen, isAdmin } = useApp();
   const confirm = useConfirm();
   const toast = useToast();
   const [editing, setEditing] = useState<{ id: string; name: string } | null>(null);
@@ -53,8 +53,9 @@ export default function CategoriesPage() {
       <div className="flex flex-wrap items-end justify-between gap-3 pt-3">
         <div>
           <h1 className="text-[1.45rem] font-extrabold tracking-tight">Danh mục</h1>
-          <p className="mt-0.5 text-sm text-muted">Sắp xếp list của bạn theo cách riêng — tạo bao nhiêu danh mục tùy thích.</p>
+          <p className="mt-0.5 text-sm text-muted">Cách trang được sắp xếp — do Admin tạo và quản lý.</p>
         </div>
+        {isAdmin ? (
         <div className="flex items-center gap-2">
           {empties.length > 1 && !loading ? (
             <Button variant="ghost" onClick={() => void cleanEmpties()} loading={cleaning}>
@@ -65,6 +66,7 @@ export default function CategoriesPage() {
             <Plus className="h-4 w-4" /> Thêm danh mục
           </Button>
         </div>
+        ) : null}
       </div>
 
       {loading ? (
@@ -88,6 +90,7 @@ export default function CategoriesPage() {
                   <p className="truncate text-[.95rem] font-bold">{c.name}</p>
                   <p className="text-[.76rem] font-semibold text-muted">{count} sản phẩm</p>
                 </button>
+                {isAdmin ? (
                 <div className="flex gap-1.5">
                   <button
                     aria-label={`Đổi tên ${c.name}`}
@@ -114,6 +117,7 @@ export default function CategoriesPage() {
                     <Trash2 className="h-[18px] w-[18px]" />
                   </button>
                 </div>
+                ) : null}
               </div>
             );
           })}
@@ -121,7 +125,9 @@ export default function CategoriesPage() {
             <div className="rounded-card border-[1.5px] border-dashed border-line bg-surface/60 px-6 py-10 text-center sm:col-span-2 xl:col-span-3">
               <p className="text-sm font-bold">Chưa có danh mục nào</p>
               <p className="mt-1 text-[.82rem] text-muted">
-                Bấm <b className="text-teal-deep dark:text-teal-200">Thêm danh mục</b> ở trên để tạo danh mục đầu tiên của bạn.
+                {isAdmin
+                  ? <>Bấm <b className="text-teal-deep dark:text-teal-200">Thêm danh mục</b> ở trên để tạo danh mục đầu tiên của bạn.</>
+                  : "Admin sẽ tạo danh mục để sắp xếp sản phẩm cho dễ xem ♥"}
               </p>
             </div>
           ) : null}

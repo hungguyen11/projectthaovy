@@ -7,13 +7,19 @@ import { ACCENTS, getAccent, setAccent, type AccentId } from "@/lib/accent";
 import { useApp } from "@/components/providers/AppProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types";
 
 export default function SettingsPage() {
-  const { profile, refreshAll } = useApp();
+  const { profile, refreshAll, loading } = useApp();
+  const isAdmin = profile?.role === "ADMIN";
+  const router = useRouter();
+  useEffect(() => {
+    if (!loading && !isAdmin) router.replace("/dashboard"); // khu quản trị — chỉ Admin
+  }, [loading, isAdmin, router]);
   return (
     <div className="space-y-5">
       <div className="pt-3">

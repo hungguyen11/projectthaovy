@@ -35,7 +35,7 @@ const short = (u: string) => {
 };
 
 export function BulkImportModal() {
-  const { bulkOpen, setBulkOpen, categories, refreshAll } = useApp();
+  const { bulkOpen, setBulkOpen, categories, refreshAll, isAdmin } = useApp();
   const [step, setStep] = useState<"pick" | "run">("pick");
   const [links, setLinks] = useState<string[]>([]);
   const [skipped, setSkipped] = useState(0);
@@ -170,6 +170,8 @@ export function BulkImportModal() {
   const done = rows.filter((r) => r.state !== "wait" && r.state !== "load").length;
   const pct = rows.length ? Math.round((done / rows.length) * 100) : 0;
   const cnt = (s: RowState) => rows.filter((r) => r.state === s).length;
+
+  if (!isAdmin) return null; // chỉ Admin dùng được luồng nhập hàng loạt
 
   return (
     <Modal

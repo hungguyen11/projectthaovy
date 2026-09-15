@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { requireUser, jsonError, route } from "@/lib/session";
+import { requireAdmin, jsonError, route } from "@/lib/session";
 
 export const runtime = "nodejs";
 
 /** PATCH /api/categories/:id { name } */
 async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireAdmin();
   const { id } = await ctx.params;
   let body: Record<string, unknown>;
   try {
@@ -33,7 +33,7 @@ async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string
 
 /** DELETE /api/categories/:id — sản phẩm trong danh mục chuyển sang 'Khác' (tự tạo nếu thiếu). */
 async function __DELETE(_request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireAdmin();
   const { id } = await ctx.params;
 
   const { data: cat } = await supabase

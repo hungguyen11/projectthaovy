@@ -15,23 +15,26 @@ import { useApp } from "@/components/providers/AppProvider";
  * © _hngnguynn_
  */
 export function ProductCard({ product, index = 0, compact = false }: { product: Product; index?: number; compact?: boolean }) {
-  const { patchProduct, setDetailProduct } = useApp();
+  const { patchProduct, setDetailProduct, isAdmin, guestFavs, toggleGuestFav } = useApp();
   const st = STATUS_META[product.status];
   const mp = MARKETPLACE_META[product.marketplace] ?? MARKETPLACE_META.OTHER;
-  const isFav = product.status === "FAVORITE";
+  const isFav = isAdmin ? product.status === "FAVORITE" : guestFavs.has(product.id);
   const hasPrice = product.price != null || !!product.price_label;
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
   return (
     <article
-      role="button"
-      tabIndex={0}
-      aria-label={`Xem chi tiết: ${product.product_name}`}
+      role={isAdmin ? "button" : undefined}
+      tabIndex={isAdmin ? 0 : undefined}
+      aria-label={isAdmin ? `Xem chi tiết: ${product.product_name}` : undefined}
       style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
-      onClick={() => setDetailProduct(product)}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailProduct(product)}
-      className="rise-in group relative flex cursor-pointer flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card transition duration-200 hover:-translate-y-[3px] hover:border-teal/45 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-teal"
+      onClick={isAdmin ? () => setDetailProduct(product) : undefined}
+      onKeyDown={isAdmin ? (e) => (e.key === "Enter" || e.key === " ") && setDetailProduct(product) : undefined}
+      className={cn(
+        "rise-in group relative flex flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card transition duration-200 hover:-translate-y-[3px] hover:border-teal/45 hover:shadow-lift",
+        isAdmin ? "cursor-pointer focus-visible:outline-2 focus-visible:outline-teal" : "cursor-default"
+      )}
     >
       {/* media */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-aqua-soft">
@@ -93,7 +96,8 @@ export function ProductCard({ product, index = 0, compact = false }: { product: 
             aria-label={isFav ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
             onClick={async (e) => {
               stop(e);
-              await patchProduct(product.id, { status: isFav ? "PENDING" : "FAVORITE" });
+              if (isAdmin) await patchProduct(product.id, { status: isFav ? "PENDING" : "FAVORITE" });
+              else toggleGuestFav(product.id);
             }}
             className={cn(
               "flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[12px] border transition active:scale-95",

@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Moon, Plus, Search, Settings, Sun, Clock, LogOut } from "lucide-react";
+import { Bell, KeyRound, Moon, Plus, Search, Settings, Sun, Clock, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useApp } from "@/components/providers/AppProvider";
 import { MARKETPLACE_META } from "@/lib/config";
 import { timeAgo } from "@/lib/utils";
 
 export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: boolean }) {
-  const { query, setQuery, profile, products, setDetailProduct, setAddOpen } = useApp();
+  const { query, setQuery, profile, products, setDetailProduct, setAddOpen, isAdmin } = useApp();
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const [local, setLocal] = useState(query);
@@ -77,6 +78,7 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
         >
           {dark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
         </button>
+        {isAdmin ? (
         <div className="relative" ref={bellRef}>
           <button
             aria-label="Vừa thêm gần đây"
@@ -131,8 +133,18 @@ export function Topbar({ onMenu, open = false }: { onMenu: () => void; open?: bo
             </div>
           ) : null}
         </div>
+        ) : null}
 
-        <div className="relative" ref={popRef}>
+        {!isAdmin ? (
+          <Link
+            href="/login"
+            className="flex items-center gap-2 rounded-full border border-line bg-surface py-1.5 pl-2.5 pr-3.5 text-[.82rem] font-extrabold shadow-card transition hover:border-teal active:scale-95"
+          >
+            <KeyRound className="h-4 w-4 text-teal-deep dark:text-teal-300" />
+            ADMIN
+          </Link>
+        ) : null}
+        <div className="relative" ref={popRef} style={isAdmin ? undefined : { display: "none" }}>
           <button
             onClick={() => setOpenPop((v) => !v)}
             className="flex items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-2.5 text-sm font-semibold shadow-card transition hover:border-teal"

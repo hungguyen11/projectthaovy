@@ -22,7 +22,7 @@ import type { ExtractedMeta, ProductStatus } from "@/types";
 type Phase = "idle" | "loading" | "done" | "error";
 
 export function AddProductModal() {
-  const { addOpen, setAddOpen, categories, addProduct, setDetailProduct } = useApp();
+  const { addOpen, setAddOpen, categories, addProduct, setDetailProduct, isAdmin } = useApp();
   const confirm = useConfirm();
 
   const [url, setUrl] = useState("");
@@ -138,6 +138,8 @@ export function AddProductModal() {
   };
 
   const mp = meta ? MARKETPLACE_META[meta.marketplace] ?? MARKETPLACE_META.OTHER : null;
+
+  if (!isAdmin) return null; // khách không có luồng thêm sản phẩm — khu Admin
 
   return (
     <Modal
