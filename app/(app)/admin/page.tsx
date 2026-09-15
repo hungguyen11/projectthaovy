@@ -80,22 +80,31 @@ export default function AdminPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setDenied(false);
-    try {
-      const [u, p, c] = await Promise.all([
-        api<{ users: AdminUser[]; total: number }>("/api/admin/users?per=100"),
-        api<{ products: AdminProduct[]; total: number }>("/api/admin/products"),
-        api<{ categories: AdminCat[]; total: number }>("/api/admin/categories"),
-      ]);
-      setUsers(u.users ?? []);
-      setProducts(p.products ?? []);
-      setCats(c.categories ?? []);
-      setTotals({ users: u.total ?? (u.users?.length ?? 0), products: p.total ?? 0, categories: c.total ?? 0 });
-    } catch (e) {
-      if (e instanceof ApiError && (e.status === 403 || e.code === "FORBIDDEN")) setDenied(true);
-      else toast("err", "Lỗi admin", e instanceof Error ? e.message : "Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
-    }
+    // allSettled: một nguồn lỗi KHÔNG được kéo sập cả trang (lỗi cũ: Promise.all → trống trơn)
+    const [u, p, c] = await Promise.allSettled([
+      api<{ users: AdminUser[]; total: number }>("/api/admin/users?per=100"),
+      api<{ products: AdminProduct[]; total: number }>("/api/admin/products"),
+      api<{ categories: AdminCat[]; total: number }>("/api/admin/categories"),
+    ]);
+    const err = (x: PromiseSettledResult<unknown>) =>
+      x.status === "rejected" && !(x.reason instanceof ApiError && (x.reason.status === 403 || x.reason.code === "FORBIDDEN"))
+        ? (x.reason as Error)
+        : null;
+    const deniedErr = [u, p, c].find(
+      (x) => x.status === "rejected" && x.reason instanceof ApiError && (x.reason.status === 403 || x.reason.code === "FORBIDDEN")
+    );
+    if (deniedErr) setDenied(true);
+    if (u.status === "fulfilled") setUsers(u.value.users ?? []);
+    if (p.status === "fulfilled") setProducts(p.value.products ?? []);
+    if (c.status === "fulfilled") setCats(c.value.categories ?? []);
+    setTotals({
+      users: u.status === "fulfilled" ? (u.value.total ?? u.value.users?.length ?? 0) : 0,
+      products: p.status === "fulfilled" ? (p.value.total ?? 0) : 0,
+      categories: c.status === "fulfilled" ? (c.value.total ?? 0) : 0,
+    });
+    const someErr = err(u) ?? err(p) ?? err(c);
+    if (someErr) toast("err", "Một phần dữ liệu chưa tải được", someErr.message || "Thử lại sau ít phút.");
+    setLoading(false);
   }, [toast]);
 
   useEffect(() => {

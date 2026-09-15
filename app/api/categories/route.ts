@@ -4,10 +4,11 @@ export const runtime = "nodejs";
 
 /** GET /api/categories */
 async function __GET() {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const { data, error } = await supabase
     .from("categories")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: true })
     .limit(200);
   if (error) return jsonError(500, "DB", "Không thể tải danh mục. Vui lòng thử lại.");
@@ -26,7 +27,7 @@ async function __POST(request: Request) {
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name || name.length > 64) return jsonError(400, "BAD_NAME", "Tên danh mục phải từ 1–64 ký tự.");
 
-  const { data: clash } = await supabase.from("categories").select("id").eq("name", name).maybeSingle();
+  const { data: clash } = await supabase.from("categories").select("id").eq("user_id", user.id).eq("name", name).maybeSingle();
   if (clash) return jsonError(409, "DUPLICATE", "Bạn đã có danh mục trùng tên này.");
 
   const { data, error } = await supabase

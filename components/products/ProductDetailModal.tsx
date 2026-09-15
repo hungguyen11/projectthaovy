@@ -69,13 +69,35 @@ export function ProductDetailModal() {
         ) : null
       }
     >
-      {p ? <DetailBody key={p.id} product={p} onStatus={async (s) => { await patchProduct(p.id, { status: s }); }} /> : null}
+      {p ? (
+        <DetailBody
+          key={p.id}
+          product={p}
+          onStatus={async (s) => {
+            const res = await patchProduct(p.id, { status: s });
+            if (res) setDetailProduct(res);
+          }}
+          onCategory={async (catId) => {
+            const res = await patchProduct(p.id, { category_id: catId });
+            if (res) setDetailProduct(res);
+          }}
+        />
+      ) : null}
     </Modal>
   );
 }
 
-function DetailBody({ product: p, onStatus }: { product: Product; onStatus: (s: ProductStatus) => void }) {
+function DetailBody({
+  product: p,
+  onStatus,
+  onCategory,
+}: {
+  product: Product;
+  onStatus: (s: ProductStatus) => void;
+  onCategory: (id: string | null) => void | Promise<void>;
+}) {
   const [imgFailed, setImgFailed] = useState(false);
+  const { categories } = useApp();
   const st = STATUS_META[p.status];
   const mp = MARKETPLACE_META[p.marketplace] ?? MARKETPLACE_META.OTHER;
   const statuses: { k: ProductStatus; icon: typeof Star }[] = [
@@ -129,7 +151,22 @@ function DetailBody({ product: p, onStatus }: { product: Product; onStatus: (s: 
         <div className="mt-4 rounded-[16px] border border-line bg-bg/70 p-4 dark:bg-[#0F1B31]">
           <p className="mb-2 text-[.7rem] font-extrabold uppercase tracking-[.07em] text-muted">Thông tin sản phẩm</p>
           <dl className="space-y-2 text-[.85rem]">
-            <Row k="Danh mục">{p.category?.name ?? "Chưa phân loại"}</Row>
+            <Row k="Danh mục">
+              <label className="flex w-full items-center gap-2">
+                <select
+                  aria-label="Đổi danh mục của sản phẩm"
+                  className="w-full max-w-[260px] cursor-pointer rounded-[10px] border border-line bg-surface px-2.5 py-1.5 text-[.82rem] font-bold transition hover:border-teal/60 focus:border-teal"
+                  value={p.category_id ?? ""}
+                  onChange={(e) => void onCategory(e.target.value || null)}
+                >
+                  <option value="">Chưa phân loại</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <span className="whitespace-nowrap text-[.7rem] font-semibold text-muted">đổi là lưu ngay</span>
+              </label>
+            </Row>
             <Row k="Trạng thái">{st.label}</Row>
             <Row k="Nguồn">{mp.label}</Row>
             <Row k="Ngày thêm">{dateStr}</Row>

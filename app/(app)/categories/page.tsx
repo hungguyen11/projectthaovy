@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Eraser, Pencil, Plus, Trash2 } from "lucide-react";
 import { useApp } from "@/components/providers/AppProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { CardSkeleton } from "@/components/ui/Skeleton";
@@ -11,10 +12,29 @@ import { useConfirm } from "@/components/providers/ConfirmProvider";
 export default function CategoriesPage() {
   const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen } = useApp();
   const confirm = useConfirm();
+  const toast = useToast();
   const [editing, setEditing] = useState<{ id: string; name: string } | null>(null);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
+
+  const countOf = (id: string) => products.filter((p) => p.category_id === id).length;
+  const empties = categories.filter((c) => countOf(c.id) === 0);
+
+  const cleanEmpties = async () => {
+    const ok = await confirm({
+      title: `Xoá ${empties.length} danh mục trống?`,
+      message: "Toàn bộ danh mục chưa chứa sản phẩm nào sẽ bị xoá. Danh mục có sản phẩm được giữ nguyên.",
+      okText: "Xoá tất cả",
+    });
+    if (!ok) return;
+    setCleaning(true);
+    let removed = 0;
+    for (const c of empties) if (await deleteCategory(c.id)) removed++;
+    setCleaning(false);
+    toast("ok", "Đã dọn danh mục trống", `${removed}/${empties.length} danh mục đã xoá.`);
+  };
 
   const submit = async () => {
     const v = name.trim();
@@ -35,9 +55,16 @@ export default function CategoriesPage() {
           <h1 className="text-[1.45rem] font-extrabold tracking-tight">Danh mục</h1>
           <p className="mt-0.5 text-sm text-muted">Sắp xếp list của bạn theo cách riêng — tạo bao nhiêu danh mục tùy thích.</p>
         </div>
-        <Button onClick={() => { setEditing(null); setName(""); setCreating(true); }}>
-          <Plus className="h-4 w-4" /> Thêm danh mục
-        </Button>
+        <div className="flex items-center gap-2">
+          {empties.length > 1 && !loading ? (
+            <Button variant="ghost" onClick={() => void cleanEmpties()} loading={cleaning}>
+              <Eraser className="h-4 w-4" /> Dọn {empties.length} danh mục trống
+            </Button>
+          ) : null}
+          <Button onClick={() => { setEditing(null); setName(""); setCreating(true); }}>
+            <Plus className="h-4 w-4" /> Thêm danh mục
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -90,31 +117,16 @@ export default function CategoriesPage() {
               </div>
             );
           })}
-          <button
-            onClick={() => { setEditing(null); setName(""); setCreating(true); }}
-            className="flex min-h-[76px] items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-teal/40 bg-teal-soft/50 text-sm font-bold text-teal-ink transition hover:bg-teal-soft active:scale-[.99] dark:text-teal-200"
-          >
-            <Plus className="h-4 w-4" /> Tạo danh mục mới
-          </button>
+          {categories.length === 0 ? (
+            <div className="rounded-card border-[1.5px] border-dashed border-line bg-surface/60 px-6 py-10 text-center sm:col-span-2 xl:col-span-3">
+              <p className="text-sm font-bold">Chưa có danh mục nào</p>
+              <p className="mt-1 text-[.82rem] text-muted">
+                Bấm <b className="text-teal-deep dark:text-teal-200">Thêm danh mục</b> ở trên để tạo danh mục đầu tiên của bạn.
+              </p>
+            </div>
+          ) : null}
         </div>
       )}
-
-      <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-        <span>Danh mục là của riêng bạn — tự tạo, tự đặt tên. Gợi ý bắt đầu:</span>
-        {["Đồ cho phòng", "Đồ học tập", "Quà tặng", "Công nghệ"].map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => {
-              setEditing(null); setName(s);
-              setCreating(true);
-            }}
-            className="rounded-full border border-line bg-surface px-2.5 py-1 font-semibold text-muted transition hover:border-teal hover:text-teal-ink active:scale-95 dark:hover:text-teal-200"
-          >
-            + {s}
-          </button>
-        ))}
-      </div>
 
       <Modal
         open={creating}

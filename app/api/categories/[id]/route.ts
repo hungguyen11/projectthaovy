@@ -44,30 +44,38 @@ async function __DELETE(_request: NextRequest, ctx: { params: Promise<{ id: stri
     .maybeSingle();
   if (!cat) return jsonError(404, "NOT_FOUND", "Không tìm thấy danh mục.");
 
-  let { data: other } = await supabase
-    .from("categories")
-    .select("id")
-    .eq("name", "Khác")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (!other) {
-    const { data: created } = await supabase
-      .from("categories")
-      .insert({ user_id: user.id, name: "Khác" })
-      .select("id")
-      .single();
-    other = created;
-  }
-
-  await supabase
+  // chỉ cần danh mục "Khác" làm đích chuyển khi THỰC SỰ có sản phẩm trỏ vào đây
+  const { count } = await supabase
     .from("products")
-    .update({ category_id: other?.id ?? null })
+    .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .eq("category_id", id);
 
+  if ((count ?? 0) > 0) {
+    let { data: other } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("name", "Khác")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!other) {
+      const { data: created } = await supabase
+        .from("categories")
+        .insert({ user_id: user.id, name: "Khác" })
+        .select("id")
+        .single();
+      other = created;
+    }
+    await supabase
+      .from("products")
+      .update({ category_id: other?.id ?? null })
+      .eq("user_id", user.id)
+      .eq("category_id", id);
+  }
+
   const { error } = await supabase.from("categories").delete().eq("id", id).eq("user_id", user.id);
   if (error) return jsonError(500, "DB", "Không thể xóa danh mục. Vui lòng thử lại.");
-  return Response.json({ ok: true, moved_to: other?.id ?? null });
+  return Response.json({ ok: true });
 }
 
 

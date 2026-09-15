@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus } from "lucide-react";
+import { FileSpreadsheet, Plus } from "lucide-react";
 import { useApp } from "@/components/providers/AppProvider";
 import { Button } from "@/components/ui/Button";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
@@ -27,7 +27,7 @@ function ProductsView() {
   const urlStatus = (sp.get("status") as ProductStatus | null) ?? null;
   const chipMode = !urlStatus; // trang /products cho phép đổi status bằng chip
 
-  const { products, categories, loading, error, refreshAll, query, setQuery, setAddOpen } = useApp();
+  const { products, categories, loading, error, refreshAll, query, setQuery, setAddOpen, setBulkOpen } = useApp();
   const [chip, setChip] = useState<(typeof STATUS_KEYS)[number]>("ALL");
   const [cat, setCat] = useState<string>("ALL");
   const [mpf, setMpf] = useState<"ALL" | "SHOPEE" | "TIKTOK_SHOP">("ALL");
@@ -82,9 +82,14 @@ function ProductsView() {
           <h1 className="text-[1.45rem] font-extrabold tracking-tight">{head.t}</h1>
           <p className="mt-0.5 text-sm text-muted">{head.s}</p>
         </div>
-        <Button onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" /> Thêm sản phẩm
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="soft" onClick={() => setBulkOpen(true)}>
+            <FileSpreadsheet className="h-4 w-4" /> Nhập hàng loạt
+          </Button>
+          <Button onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" /> Thêm sản phẩm
+          </Button>
+        </div>
       </div>
 
       {/* lọc theo trạng thái */}

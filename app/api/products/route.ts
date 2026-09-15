@@ -11,12 +11,13 @@ const STATUSES: ProductStatus[] = ["PENDING", "PRIORITY", "FAVORITE", "PURCHASED
 
 /** GET /api/products?status=&category=&q=&sort=  — chỉ dữ liệu của chính user (RLS). */
 async function __GET(request: NextRequest) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const sp = request.nextUrl.searchParams;
 
   let query = supabase
     .from("products")
     .select("*, category:categories(id,name)")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(500);
 
@@ -81,7 +82,7 @@ async function __POST(request: NextRequest) {
 
   // đảm bảo category thuộc về user này (RLS cũng chặn, đây là validate)
   if (category_id) {
-    const { data: cat } = await supabase.from("categories").select("id").eq("id", category_id).maybeSingle();
+    const { data: cat } = await supabase.from("categories").select("id").eq("id", category_id).eq("user_id", user.id).maybeSingle();
     if (!cat) category_id = null;
   }
 
@@ -89,6 +90,7 @@ async function __POST(request: NextRequest) {
   const { data: existing } = await supabase
     .from("products")
     .select("*, category:categories(id,name)")
+    .eq("user_id", user.id)
     .limit(500);
   const dup = (existing as Product[] | null)?.find(
     (p) =>

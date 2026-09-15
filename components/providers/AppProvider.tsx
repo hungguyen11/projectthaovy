@@ -44,6 +44,8 @@ interface AppCtx {
 
   addOpen: boolean;
   setAddOpen: (v: boolean) => void;
+  bulkOpen: boolean;
+  setBulkOpen: (v: boolean) => void;
   detailProduct: Product | null;
   setDetailProduct: (p: Product | null) => void;
 
@@ -68,6 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [query, setQuery] = useState("");
 
   const [addOpen, setAddOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
 
   const refreshAll = useCallback(async () => {
@@ -207,14 +210,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       query, setQuery,
       refreshAll, addProduct, patchProduct, deleteProduct,
       createCategory, renameCategory, deleteCategory,
-      addOpen, setAddOpen, detailProduct, setDetailProduct, stats,
+      addOpen, setAddOpen, bulkOpen, setBulkOpen, detailProduct, setDetailProduct, stats,
     }),
     [
       profile, products, categories, loading, error,
       query,
       refreshAll, addProduct, patchProduct, deleteProduct,
       createCategory, renameCategory, deleteCategory,
-      addOpen, detailProduct, stats,
+      addOpen, bulkOpen, detailProduct, stats,
     ]
   );
 

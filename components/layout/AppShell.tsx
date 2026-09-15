@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { AddProductModal } from "@/components/products/AddProductModal";
+import { BulkImportModal } from "@/components/products/BulkImportModal";
 import { ProductDetailModal } from "@/components/products/ProductDetailModal";
 import { ConfigNotice } from "@/components/ConfigNotice";
 import { applyAccent, getAccent } from "@/lib/accent";
@@ -57,6 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
       <MobileNav />
       <AddProductModal />
+      <BulkImportModal />
       <ProductDetailModal />
     </AppProvider>
   );

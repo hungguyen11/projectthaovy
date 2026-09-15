@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, Heart, Plus, ShoppingBag, Star } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, FileSpreadsheet, Heart, Plus, ShoppingBag, Star } from "lucide-react";
 import { useApp } from "@/components/providers/AppProvider";
 import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState } from "@/components/ui/EmptyState";
@@ -13,13 +13,8 @@ import { ProductCard } from "@/components/products/ProductCard";
  * Toàn bộ logic dữ liệu dùng qua useApp, không đổi.
  */
 export default function DashboardPage() {
-  const { profile, stats, loading, error, products, setAddOpen, refreshAll } = useApp();
+  const { profile, stats, loading, error, products, setAddOpen, setBulkOpen, refreshAll } = useApp();
   const name = profile?.display_name || profile?.username || "bạn";
-
-  const featured = [
-    ...products.filter((p) => p.status === "PRIORITY" || p.status === "FAVORITE"),
-    ...products.filter((p) => p.status === "PENDING"),
-  ].slice(0, 8);
 
   const chips = [
     { key: "total", label: "Tổng", value: stats.total, icon: ShoppingBag, href: "/products", tint: "bg-teal-soft text-teal dark:text-teal-300" },
@@ -39,9 +34,14 @@ export default function DashboardPage() {
           </h1>
           <p className="mt-0.5 text-[.95rem] font-semibold text-muted">Bạn đang muốn mua gì hôm nay?</p>
         </div>
-        <Button className="rounded-full px-5" onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" /> Thêm sản phẩm
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button className="rounded-full px-4" variant="soft" onClick={() => setBulkOpen(true)}>
+            <FileSpreadsheet className="h-4 w-4" /> Nhập hàng loạt
+          </Button>
+          <Button className="rounded-full px-5" onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" /> Thêm sản phẩm
+          </Button>
+        </div>
       </section>
 
       {/* ── thống kê nhỏ — một hàng chip, bấm là lọc ── */}
@@ -63,11 +63,12 @@ export default function DashboardPage() {
 
       {error ? <ErrorState message={error} onRetry={() => void refreshAll()} /> : null}
 
-      {/* ── nổi bật / rỗng / đang tải ── */}
-      {featured.length > 0 ? (
+      {/* ── toàn bộ sản phẩm — xếp hàng · cột, 5 ô mỗi hàng trên desktop ── */}
+      {products.length > 0 ? (
         <section className="rise-in" style={{ animationDelay: "120ms" }}>
           <div className="mb-3 flex items-baseline gap-3">
-            <h2 className="text-[1.02rem] font-extrabold tracking-tight">Sản phẩm nổi bật</h2>
+            <h2 className="text-[1.02rem] font-extrabold tracking-tight">Toàn bộ sản phẩm</h2>
+            <span className="text-[.78rem] font-bold text-muted">{products.length}</span>
             <Link
               href="/products"
               className="ml-auto inline-flex items-center gap-1 text-[.82rem] font-bold text-teal-ink hover:underline dark:text-teal-200"
@@ -75,17 +76,15 @@ export default function DashboardPage() {
               Xem tất cả <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="-mx-1 flex snap-x gap-3.5 overflow-x-auto px-1 pb-2">
-            {featured.map((p, i) => (
-              <div key={p.id} className="w-[226px] flex-none snap-start">
-                <ProductCard product={p} index={i} compact />
-              </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {products.map((p, i) => (
+              <ProductCard key={p.id} product={p} index={i} />
             ))}
           </div>
         </section>
-      ) : loading ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+      ) : error ? null : loading ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="aspect-[3/4.1] rounded-card border border-line bg-surface p-2 shadow-card">
               <div className="shimmer h-full w-full rounded-[12px]" />
             </div>
@@ -94,7 +93,7 @@ export default function DashboardPage() {
       ) : (
         <EmptyState
           title="Chưa có sản phẩm nào"
-          message="Thêm những sản phẩm bạn đang quan tâm để dễ theo dõi và mua sau."
+          message="Thêm từng link hoặc dùng “Nhập hàng loạt” từ file Excel — mỗi dòng một link, web tự lấy thông tin."
         />
       )}
     </div>

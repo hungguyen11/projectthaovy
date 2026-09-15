@@ -35,24 +35,29 @@
   --accent-ink: 109 40 217; --accent-soft: 245 243 255; --accent-softer: 237 233 254;
   --accent-mist: 246 245 253; --accent-200: 221 214 254; --accent-300: 196 181 253;
   --accent-950: 46 16 101;
+  /* cả trang nhuộm theo chủ đề (sáng) */
+  --bg: 250 249 254; --surface: 255 255 255; --line: 228 224 243;
 }
 [data-accent="rose"] {
   --accent: 225 29 72; --accent-bright: 251 113 133; --accent-deep: 190 18 60;
   --accent-ink: 190 18 60; --accent-soft: 255 241 242; --accent-softer: 255 241 242;
   --accent-mist: 254 242 245; --accent-200: 254 205 211; --accent-300: 253 164 175;
   --accent-950: 76 5 30;
+  --bg: 255 249 250; --surface: 255 255 255; --line: 245 226 231;
 }
 [data-accent="emerald"] {
   --accent: 16 185 129; --accent-bright: 52 211 153; --accent-deep: 5 150 105;
   --accent-ink: 4 120 87; --accent-soft: 236 253 245; --accent-softer: 231 250 241;
   --accent-mist: 240 253 244; --accent-200: 167 243 208; --accent-300: 110 231 183;
   --accent-950: 2 44 34;
+  --bg: 245 251 248; --surface: 255 255 255; --line: 215 237 226;
 }
 [data-accent="amber"] {
   --accent: 217 119 6; --accent-bright: 245 158 11; --accent-deep: 180 83 9;
   --accent-ink: 180 83 9; --accent-soft: 255 251 235; --accent-softer: 254 247 224;
   --accent-mist: 255 251 240; --accent-200: 253 230 138; --accent-300: 252 211 77;
   --accent-950: 69 26 3;
+  --bg: 255 250 241; --surface: 255 254 250; --line: 240 229 205;
 }
 
 .dark {
@@ -62,6 +67,13 @@
   --muted: 148 163 184;
   --line: 30 41 59;
 }
+
+/* Đêm theo chủ đề accent — đặt SAU .dark để thắng */
+html.dark[data-accent="cyan"]    { --bg: 8 16 26; --surface: 13 26 40; --line: 24 44 60; }
+html.dark[data-accent="iris"]    { --bg: 12 11 26; --surface: 21 19 40; --line: 40 34 72; }
+html.dark[data-accent="rose"]    { --bg: 22 11 16; --surface: 30 17 24; --line: 58 33 44; }
+html.dark[data-accent="emerald"] { --bg: 7 18 15; --surface: 13 29 24; --line: 30 55 46; }
+html.dark[data-accent="amber"]   { --bg: 19 15 8; --surface: 30 24 14; --line: 56 45 26; }
 
 html { scroll-behavior: smooth; }
 body {

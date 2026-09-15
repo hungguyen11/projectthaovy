@@ -164,7 +164,7 @@ create policy budgets_owner on public.budgets
   using (user_id = (select auth.uid()))
   with check (user_id = (select auth.uid()));
 
--- ── AUTO-PROVISION user mới (profile + danh mục mặc định) ─────────────
+-- ── AUTO-PROVISION user mới (CHỈ tạo profile — danh mục do user tự tạo) ─
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -185,11 +185,7 @@ begin
   values (uid, uname, dname, 'USER')
   on conflict (user_id) do nothing;
 
-  insert into public.categories (user_id, name)
-  select uid, unnest(array[
-    'Thời trang','Giày dép','Làm đẹp','Công nghệ','Đồ dùng','Phụ kiện','Khác'
-  ])
-  on conflict (user_id, name) do nothing;
+  -- KHÔNG seed danh mục mặc định — app để trống, user tự tạo.
 
   return new;
 end $$;
