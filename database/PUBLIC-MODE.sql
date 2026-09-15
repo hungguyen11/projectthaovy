@@ -1,7 +1,9 @@
 -- ═══════════════════════════════════════════════════════════════════
--- PUBLIC-MODE.sql — chạy MỘT LẦN trong Supabase → SQL Editor → Run.
--- Bật "web công khai": ai cũng XEM được sản phẩm/danh mục (không cần
--- tài khoản); ghi/sửa/xoá vẫn chỉ qua API máy chủ của Admin.
+-- PUBLIC-MODE.sql — TÙY CHỌN (không bắt buộc từ bản này).
+-- Web đã tự đọc list của Admin qua kênh service key (SUPABASE_SECRET_KEY
+-- trên Vercel) nên người xem thấy sản phẩm NGAY, không cần chạy SQL này.
+-- Chạy nó nếu bạn MUỐN thêm lớp "anon đọc trực tiếp" (phòng khi thiếu
+-- service key) + dọn dữ liệu tài khoản test cũ (mục 3 nên chạy 1 lần).
 -- © _hngnguynn_
 -- ═══════════════════════════════════════════════════════════════════
 

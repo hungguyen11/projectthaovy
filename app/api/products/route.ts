@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { requireAdmin, jsonError, route } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { publicReadClient } from "@/lib/public-feed";
 import { validateUrl } from "@/lib/metadata/ssrf";
 import { detectMarketplace } from "@/lib/config";
 import { normalizeUrl } from "@/lib/utils";
@@ -10,10 +10,10 @@ export const runtime = "nodejs";
 
 const STATUSES: ProductStatus[] = ["PENDING", "PRIORITY", "FAVORITE", "PURCHASED"];
 
-/** GET /api/products — PUBLIC: toàn bộ sản phẩm do Admin quản lý, ai cũng xem được. */
+/** GET /api/products — PUBLIC: toàn bộ sản phẩm do Admin gắn, ai cũng xem được. */
 async function __GET(request: NextRequest) {
-  // CHẾ ĐỘ CÔNG KHAI: ai cũng đọc được list của Admin (không cần đăng nhập).
-  const supabase = await createClient();
+  // Kênh đọc công khai (xem lib/public-feed.ts): service key → chỉ data của ADMIN.
+  const { client: supabase, adminIds } = await publicReadClient();
   const sp = request.nextUrl.searchParams;
 
   let query = supabase
@@ -21,6 +21,7 @@ async function __GET(request: NextRequest) {
     .select("*, category:categories(id,name)")
     .order("created_at", { ascending: false })
     .limit(500);
+  if (adminIds) query = query.in("user_id", adminIds);
 
   const status = sp.get("status");
   if (status && STATUSES.includes(status as ProductStatus)) query = query.eq("status", status);

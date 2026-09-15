@@ -28,6 +28,7 @@ export default function SettingsPage() {
       </div>
       <ProfileCard profile={profile} onSaved={() => void refreshAll()} />
       <ThemeCard />
+      <PublicCheckCard />
       <PasswordCard />
     </div>
   );
@@ -243,6 +244,65 @@ function ProfileCard({ profile, onSaved }: { profile: Profile | null; onSaved: (
           <Button type="submit" variant="ghost">Đăng xuất</Button>
         </form>
       </div>
+    </Section>
+  );
+}
+
+function PublicCheckCard() {
+  const [state, setState] = useState<{
+    loading?: boolean;
+    channel?: string;
+    guestVisible?: number;
+    adminTotal?: number | null;
+    admins?: number;
+    ok?: boolean;
+    err?: string;
+  } | null>(null);
+
+  const run = async () => {
+    setState({ loading: true });
+    try {
+      const r = await api<{
+        channel: string;
+        admins: number;
+        guestVisible: number;
+        adminTotal: number | null;
+        ok: boolean;
+      }>("/api/admin/public-check");
+      setState(r);
+    } catch (e) {
+      setState({ err: e instanceof Error ? e.message : "Không kiểm tra được." });
+    }
+  };
+
+  return (
+    <Section title="Công khai" sub="Trạng thái “người xem thấy gì” — web đang ở chế độ public, kiểm tra nhanh 1 nút.">
+      <div className="flex flex-wrap items-center gap-3">
+        <Button variant="soft" size="sm" onClick={() => void run()} loading={state?.loading}>
+          Kiểm tra ngay
+        </Button>
+        {state && !state.loading && !state.err ? (
+          state.ok ? (
+            <p className="inline-flex items-center gap-1.5 text-[.82rem] font-bold text-mint">
+              <Check className="h-4 w-4" /> Người xem (không cần đăng nhập) đang thấy {state.guestVisible} sản phẩm
+              {state.adminTotal != null && state.adminTotal !== state.guestVisible ? ` · trong DB có ${state.adminTotal}` : ""}
+            </p>
+          ) : (
+            <p className="text-[.82rem] font-bold text-amber-600 dark:text-amber-400">
+              ⚠ Khách đang KHÔNG thấy sản phẩm nào
+              {state.channel === "anon"
+                ? " — thiếu SUPABASE_SECRET_KEY trên Vercel (Settings → Environment Variables) hoặc chưa chạy database/PUBLIC-MODE.sql."
+                : state.admins === 0
+                  ? " — chưa có tài khoản nào role ADMIN (chạy câu update profiles trong hướng dẫn)."
+                  : " — kiểm tra database."}
+            </p>
+          )
+        ) : null}
+        {state?.err ? <p className="text-[.82rem] font-bold text-rose">{state.err}</p> : null}
+      </div>
+      <p className="mt-2 text-[.76rem] text-muted">
+        Kênh đọc công khai hiện tại: <b>{state?.channel === "admin-key" ? "service key (mạnh, không phụ thuộc RLS)" : state?.channel === "anon" ? "anon + RLS policy" : "— (bấm kiểm tra)"}</b>
+      </p>
     </Section>
   );
 }

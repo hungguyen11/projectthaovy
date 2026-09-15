@@ -1,17 +1,19 @@
 import { requireAdmin, jsonError, route } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { publicReadClient } from "@/lib/public-feed";
 
 export const runtime = "nodejs";
 
 /** GET /api/categories */
 async function __GET() {
-  // PUBLIC: danh mục của Admin cho phép khách xem để hiểu cách sắp xếp list.
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  // PUBLIC: khách xem được danh mục của Admin (kênh đọc — xem lib/public-feed.ts).
+  const { client: supabase, adminIds } = await publicReadClient();
+  let query = supabase
     .from("categories")
     .select("*")
     .order("created_at", { ascending: true })
     .limit(200);
+  if (adminIds) query = query.in("user_id", adminIds);
+  const { data, error } = await query;
   if (error) return jsonError(500, "DB", "Không thể tải danh mục. Vui lòng thử lại.");
   return Response.json({ categories: data ?? [] }, { headers: { "Cache-Control": "no-store" } });
 }
