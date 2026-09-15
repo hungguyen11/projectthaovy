@@ -13,6 +13,7 @@ import { detectMarketplace } from "@/lib/config";
 import { parseMetadata, type ParsedMeta } from "@/lib/metadata/parse";
 import { assertPublicDns, validateUrl, SsrfError } from "@/lib/metadata/ssrf";
 import { extractFirstUrl, isShortLink, parseShopee, parseTikTok, titleFromSlug } from "@/lib/metadata/link";
+import { parseShopeeState } from "@/lib/metadata/state";
 import { serpSearch, pickBestHit } from "@/lib/metadata/serp";
 import type { ExtractedMeta } from "@/types";
 
@@ -198,20 +199,43 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
   const slugTitle = shopee?.slug ? usableTitle(titleFromSlug(shopee.slug)) : null;
   if (shopee?.slug && slugTitle) title = slugTitle;
 
+  // Shopee nhúng PDP_BFF_DATA thẳng vào HTML sản phẩm → TÊN THẬT + ẢNH THẬT,
+  // đọc được từ mọi server (không qua API, không qua SERP).
+  if (shopee?.shopId && shopee?.itemId && (!title || !image)) {
+    let stateHtml: string | null = page.html && page.html.includes("PDP_BFF_DATA") ? page.html : null;
+    if (!stateHtml) {
+      const host = /^(\d+\.)?(s|mall)\./.test(page.visited.hostname) || page.visited.hostname === "shopee.vn" ? "shopee.vn" : page.visited.hostname;
+      const canon = await fetchPage(new URL(`https://${host}/product/${shopee.shopId}/${shopee.itemId}`), PAGE_TIMEOUT_MS);
+      if (canon.html) stateHtml = canon.html;
+    }
+    if (stateHtml) {
+      const st = parseShopeeState(stateHtml, shopee.shopId, shopee.itemId);
+      if (st) {
+        const stTitle = usableTitle(st.title);
+        if (stTitle && (!title || title === slugTitle)) title = stTitle;
+        if (!image && st.image) image = st.image;
+        if (!priceLabel && st.itemStatus && st.itemStatus !== "normal" && st.itemStatus !== "active") priceLabel = null; // sản phẩm tạm khoá — vẫn lưu được
+      }
+    }
+  }
+
   const words = slugTitle && shopee?.slug ? slugWords(shopee.slug) : "";
   const needTitle = !title;
   const needPrice = price == null && !priceLabel;
   const wantSerp = (marketplace === "SHOPEE" || marketplace === "TIKTOK_SHOP") && (needTitle || needPrice);
 
   if (wantSerp) {
+    const deadline = Date.now() + 9_000; // ngân sách chung cho tìm kiếm dự phòng
     const queries: string[] = [];
     if (shopee?.itemId) queries.push(`shopee "${shopee.itemId}"${shopee.shopId ? ` ${shopee.shopId}` : ""}`);
     if (words) queries.push(`site:shopee.vn "${words.slice(0, 80)}"`);
     if (words && words.length > 12) queries.push(`${words} shopee giá`);
     if (tiktok?.productId) queries.push(`tiktok "product/${tiktok.productId}" giá`);
     for (const q of queries.slice(0, 2)) {
+      const remain = deadline - Date.now();
+      if (remain < 1_200) break;
       try {
-        const hits = await serpSearch(q, SERP_TIMEOUT_MS);
+        const hits = await serpSearch(q, Math.min(SERP_TIMEOUT_MS, remain));
         const hit = pickBestHit(hits, {
           ids: [shopee?.itemId, shopee?.shopId, tiktok?.productId].filter(Boolean) as string[],
           words: words ? words.split(" ").filter(w => w.length > 3).slice(0, 5) : [],

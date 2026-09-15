@@ -6,6 +6,7 @@
 import { fetchMetadata } from "../lib/metadata/service";
 
 const CASES: Array<[string, string]> = [
+  ["LINK AFFILIATE THẬT của user (s.shopee.vn)", "https://s.shopee.vn/5AsUbsvR8v"],
   ["share text + slug Shopee (dạng link Chia sẻ từ app)", 'Siêu Sale 9.9! MŨ-LƯỠI-TRAI-NAM-CAO-CẤP-CHỐNG-NẮNG-i.176103579.11446449426 https://shopee.vn/MŨ-LƯỠI-TRAI-NAM-CAO-CẤP-CHỐNG-NẮNG-i.176103579.11446449426 bấm mua ngay kẻo lỡ'],
   ["slug Shopee thuần", "https://shopee.vn/ÁO-THUN-NAM-COTTON-CAO-CẤP-i.29868329.18120867249"],
   ["/product/a/b không slug", "https://shopee.vn/product/176103579/11446449426"],

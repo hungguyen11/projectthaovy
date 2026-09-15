@@ -40,10 +40,11 @@ export function parseShopee(u: URL): ShopeeLink | null {
   let shopId = "";
   let itemId = "";
   const m1 = path.match(/\/product\/(\d{2,})\/(\d{2,})/i);              // /product/123/456
+  const m0 = path.match(/\/[a-z][a-z0-9_-]{1,12}\/(\d{4,})\/(\d{6,})(?:\/|$)/i); // /opaanlp/357915542/9024478325 — link affiliate
   const m2 = path.match(/-i\.?(\d{2,})\.?(\d{4,})(?:\?.*)?$/i);         // -i.123.456 cuối slug
-  const m3 = path.match(/\/i[./]?(\d{2,})[./](\d{4,})(?:\/|$)/i);      // /i.123.456 hoặc /i/123/456
-  const m4 = path.match(/-(\d{4,})\.(\d{4,})\/?$/);                    // dạng -123.456
-  for (const m of [m1, m2, m3, m4]) if (m) { shopId = m[1]; itemId = m[2]; break; }
+  const m3 = path.match(/\/i[./]?(\d{2,})[./](\d{4,})(?:\/|$)/i);        // /i.123.456 hoặc /i/123/456
+  const m4 = path.match(/-(\d{4,})\.(\d{4,})\/?$/);                      // dạng -123.456
+  for (const m of [m1, m0, m2, m3, m4]) if (m) { shopId = m[1]; itemId = m[2]; break; }
   shopId = shopId || get("shopId", "shop_id", "shopid") || "";
   itemId = itemId || get("itemId", "item_id", "itemid") || "";
   let slug: string | null = null;

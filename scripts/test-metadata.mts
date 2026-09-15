@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { parseMetadata, parsePriceString } from "../lib/metadata/parse";
 import { parseShopee, parseTikTok, titleFromSlug, extractFirstUrl, isShortLink } from "../lib/metadata/link";
 import { extractPrices, parseRss } from "../lib/metadata/serp";
+import { parseShopeeState } from "../lib/metadata/state";
 import { isPrivateIp, isBlockedHostname, validateUrl, assertPublicDns, SsrfError } from "../lib/metadata/ssrf";
 
 let n = 0;
@@ -215,6 +216,25 @@ await ok(
     assert.equal(hits[0].price, 129000);
     assert.equal(hits[1].price, null);
     assert.equal(parseRss("<rss>hổng có item</rss>").length, 0);
+  }
+)();
+
+await ok(
+  "parseShopeeState — fixture thật từ PDP_BFF_DATA",
+  () => {
+    const core = `"PDP_BFF_DATA":{"cachedMap":{"357915542/9024478325":{"item":{"item_id":9024478325,"shop_id":357915542,"item_status":"normal","title":"Lót chuột cỡ lớn 100 mẫu 90x40 \\"xịn\\"","image":"vn-11134201-23030-l4m6ofhrsuovca","images":["vn-imgaaa111","vn-imgbbb222"],"shop_location":"Thành phố Hà Nội"}}}}`;
+    const html = "<html><head><title>Shopping Cart Icon</title></head><body>" + core + "x".repeat(30000) + "</body></html>";
+    const st = parseShopeeState(html, "357915542", "9024478325");
+    assert.ok(st);
+    assert.equal(st!.title, 'Lót chuột cỡ lớn 100 mẫu 90x40 "xịn"');
+    assert.equal(st!.image, "https://down-vn.img.susercontent.com/file/vn-11134201-23030-l4m6ofhrsuovca");
+    assert.equal(st!.images.length, 2);
+    assert.equal(st!.itemStatus, "normal");
+    assert.equal(parseShopeeState("<html></html>"), null);
+    // link affiliate dạng /opaanlp/<shop>/<item>
+    const u = parseShopee(new URL("https://shopee.vn/opaanlp/357915542/9024478325?__mobile__=1&uls_trackid=x"));
+    assert.equal(u?.shopId, "357915542");
+    assert.equal(u?.itemId, "9024478325");
   }
 )();
 

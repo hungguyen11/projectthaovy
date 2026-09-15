@@ -32,6 +32,7 @@ export function AddProductModal() {
   const [status, setStatus] = useState<ProductStatus>("PENDING");
   const [manualPrice, setManualPrice] = useState("");
   const [manualTitle, setManualTitle] = useState("");
+  const [manualImage, setManualImage] = useState("");
   const [saving, setSaving] = useState(false);
   const fetchId = useRef(0);
 
@@ -44,6 +45,7 @@ export function AddProductModal() {
     setStatus("PENDING");
     setManualPrice("");
     setManualTitle("");
+    setManualImage("");
     setSaving(false);
   }, []);
 
@@ -92,6 +94,7 @@ export function AddProductModal() {
   };
 
   const manualParsed = parseVndFlexible(manualPrice);
+  const manualImgUrl = manualImage.trim().startsWith("http") ? manualImage.trim() : null;
   const manualMode = !meta && phase === "error";
   const metaLacksPrice = !!meta && meta.price == null && !meta.price_label;
   const canSave = meta ? phase === "done" : manualMode && (manualParsed != null || manualTitle.trim().length >= 2);
@@ -106,7 +109,7 @@ export function AddProductModal() {
       category_id: categoryId || null,
       status,
       snapshot: {
-        image: meta?.image ?? null,
+        image: meta?.image || (manualImage.trim().startsWith("http") ? manualImage.trim() : null),
         title: meta?.title || manualTitle.trim(),
         price,
         price_label: priceLabel,
@@ -215,12 +218,18 @@ export function AddProductModal() {
             <p className="flex items-center gap-1.5 text-[.82rem] font-extrabold text-ink">
               <PencilLine className="h-4 w-4" /> Tự nhập tên & giá
             </p>
-            <p className="mt-0.5 text-[.74rem] text-muted">Điền giá là đủ lưu được; thêm tên (không bắt buộc) để thẻ đẹp hơn — ảnh dùng mặc định của app.</p>
+            <p className="mt-0.5 text-[.74rem] text-muted">Chỉ cần giá là lưu được; thêm tên & link ảnh (không bắt buộc) cho đẹp — bỏ trống ảnh sẽ dùng mặc định của app.</p>
             <input
               className="input-field mt-2"
               placeholder="Tên sản phẩm (không bắt buộc) — VD: Mũ lưỡi trai Tim và friends"
               value={manualTitle}
               onChange={(e) => setManualTitle(e.target.value)}
+            />
+            <input
+              className="input-field mt-2"
+              placeholder="Link ảnh (không bắt buộc) — dán URL ảnh nếu có"
+              value={manualImage}
+              onChange={(e) => setManualImage(e.target.value)}
             />
             <input
               className="input-field mt-2 max-w-[240px]"
@@ -252,7 +261,7 @@ export function AddProductModal() {
             <div className="relative h-28 w-full flex-none overflow-hidden rounded-xl border border-line bg-surface sm:w-36">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={meta.image || FALLBACK_IMAGE}
+                src={meta.image || manualImgUrl || FALLBACK_IMAGE}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -281,6 +290,19 @@ export function AddProductModal() {
                   {manualPrice.trim() && manualParsed != null ? (
                     <p className="mt-1 text-[.74rem] font-bold text-teal-ink dark:text-teal-200">→ {formatVnd(manualParsed)}</p>
                   ) : null}
+                </div>
+              ) : null}
+              {!meta.image ? (
+                <div className="mt-2">
+                  <label className="flex items-center gap-1.5 text-[.74rem] font-bold text-muted">
+                    <PencilLine className="h-3.5 w-3.5" /> Ảnh (tùy chọn) — sàn chặn nên không lấy tự động được:
+                  </label>
+                  <input
+                    className="input-field mt-1 !py-1.5 !text-sm"
+                    placeholder="Dán link ảnh nếu có — để trống thì dùng ảnh mặc định của app"
+                    value={manualImage}
+                    onChange={(e) => setManualImage(e.target.value)}
+                  />
                 </div>
               ) : null}
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
