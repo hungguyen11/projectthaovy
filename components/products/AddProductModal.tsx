@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useApp } from "@/components/providers/AppProvider";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { api, ApiError } from "@/lib/api-client";
+import { extractFirstUrl } from "@/lib/metadata/link";
 import { MARKETPLACE_META, FALLBACK_IMAGE } from "@/lib/config";
 import { cn, formatVnd, parseVndFlexible } from "@/lib/utils";
 import type { ExtractedMeta, ProductStatus } from "@/types";
@@ -105,7 +106,7 @@ export function AddProductModal() {
     const price = meta ? meta.price ?? manualParsed : manualParsed;
     const priceLabel = meta?.price_label ?? (price != null ? formatVnd(price) : null);
     const res = await addProduct({
-      source_url: (meta?.source_url ?? url).trim(),
+      source_url: (meta?.source_url ?? extractFirstUrl(url) ?? url).trim(),
       category_id: categoryId || null,
       status,
       snapshot: {

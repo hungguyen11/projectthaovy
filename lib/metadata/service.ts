@@ -191,7 +191,6 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
   let price = parsed.price ?? null;
   let priceLabel = parsed.price_label || null;
 
-  const visitedStr = page.visited.toString();
   const shopee = marketplace === "SHOPEE" ? parseShopee(page.visited) : null;
   const tiktok = marketplace === "TIKTOK_SHOP" ? parseTikTok(page.visited) : null;
 
@@ -276,7 +275,7 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
       price,
       price_label: priceLabel,
       marketplace,
-      source_url: visitedStr || key,
+      source_url: key, // LUÔN trả đúng link user nhập (giữ nguyên shortlink affiliate để tính click)
     },
   };
   cacheSet(key, value);
