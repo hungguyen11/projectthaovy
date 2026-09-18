@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { Eraser, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
-import { useApp, SKINCARE_SET } from "@/components/providers/AppProvider";
+import { useApp } from "@/components/providers/AppProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { api, ApiError } from "@/lib/api-client";
+import { SEED_CATEGORIES } from "@/lib/review-gen";
 
 export default function CategoriesPage() {
   const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen, isAdmin, refreshAll } = useApp();
@@ -29,7 +30,7 @@ export default function CategoriesPage() {
     let added = 0;
     let existed = 0;
     let failed = 0;
-    for (const n of SKINCARE_SET) {
+    for (const n of SEED_CATEGORIES) {
       try {
         await api("/api/categories", { method: "POST", body: { name: n } });
         added++;
@@ -40,8 +41,8 @@ export default function CategoriesPage() {
     }
     await refreshAll();
     setSeeding(false);
-    if (added > 0) toast("ok", "Đã thêm bộ danh mục Skincare", `${added} danh mục mới${existed ? ` · ${existed} đã có trước` : ""}. Đã gắn xong — vào sản phẩm, chọn danh mục và câu review sẽ gợi ý đúng chu trình.`);
-    else toast("info", "Không có gì mới", existed === SKINCARE_SET.length ? "Cả 8 danh mục skincare đã có sẵn trong list rồi." : `Đã có ${existed}/8 · ${failed} món không thêm được, thử lại sau.`);
+    if (added > 0) toast("ok", "Đã thêm bộ danh mục Skincare & Makeup", `${added} danh mục mới${existed ? ` · ${existed} đã có trước` : ""}. Chọn danh mục khi thêm sản phẩm là câu review mặc định tự điền vào.`);
+    else toast("info", "Không có gì mới", existed === SEED_CATEGORIES.length ? "Cả 27 danh mục đã có sẵn trong list rồi." : `Đã có ${existed}/${SEED_CATEGORIES.length} · ${failed} món không thêm được, thử lại sau.`);
   };
 
   const cleanEmpties = async () => {
@@ -85,7 +86,7 @@ export default function CategoriesPage() {
             </Button>
           ) : null}
           <Button variant="ghost" onClick={() => void seedSkincare()} loading={seeding}>
-            <Sparkles className="h-4 w-4" /> Bộ Skincare (8)
+            <Sparkles className="h-4 w-4" /> Bộ Skincare &amp; Makeup (27)
           </Button>
           <Button onClick={() => { setEditing(null); setName(""); setCreating(true); }}>
             <Plus className="h-4 w-4" /> Thêm danh mục

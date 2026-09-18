@@ -16,21 +16,13 @@ import {
 } from "react";
 import { ApiError, api } from "@/lib/api-client";
 import { useToast } from "@/components/providers/ToastProvider";
+import { SEED_CATEGORIES } from "@/lib/review-gen";
 import type { Category, ExtractedMeta, Product, ProductStatus, Profile } from "@/types";
 
-/** Bộ danh mục skincare theo chu trình ngày/đêm của chủ list.
- *  CHỈ Admin mới gieo được (khi đăng nhập, 1 lần per máy — hoặc bấm nút ở trang Danh mục).
+/** Bộ danh mục chính thức 2026-09: SKINCARE (12) + MAKEUP (15) — xem lib/review-gen.ts.
+ *  CHỈ Admin mới gieo được (tự động 1 lần per máy khi đăng nhập, hoặc bấm nút ở trang Danh mục).
  *  Không auto-seed cho khách, không đụng DB trigger. */
-export const SKINCARE_SET = [
-  "Tẩy trang",
-  "Sữa rửa mặt",
-  "Toner (nước cân bằng)",
-  "Tẩy tế bào chết (1-2 lần/tuần)",
-  "Serum (tinh chất)",
-  "Đặc trị (mụn / lão hóa)",
-  "Kem dưỡng ẩm",
-  "Kem chống nắng",
-];
+export { SEED_CATEGORIES };
 
 export interface NewProductInput {
   source_url: string;
@@ -172,16 +164,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     checkedRef.current = true;
     void recheckDb();
 
-    // gieo 8 danh mục skincare ĐÚNG 1 LẦN per trình duyệt — server tự bỏ món trùng tên
+    // gieo danh mục chính thức — ĐÚNG 1 LẦN per trình duyệt; server tự bỏ món trùng tên
     let seen = true;
     try {
-      seen = !!window.localStorage.getItem("tv-skincare-seed-v1");
-      if (!seen) window.localStorage.setItem("tv-skincare-seed-v1", "1");
+      seen = !!window.localStorage.getItem("tv-category-seed-v2");
+      if (!seen) window.localStorage.setItem("tv-category-seed-v2", "1");
     } catch { /* private mode: vẫn gieo, chỉ là lần sau gieo lại (server chặn trùng, không hại gì) */ }
     if (seen || seededRef.current) return;
     seededRef.current = true;
     void (async () => {
-      const names = categories.length ? SKINCARE_SET.filter((n) => !categories.some((c) => c.name.trim().toLowerCase() === n.toLowerCase())) : SKINCARE_SET;
+      const names = categories.length ? SEED_CATEGORIES.filter((n) => !categories.some((c) => c.name.trim().toLowerCase() === n.toLowerCase())) : SEED_CATEGORIES;
       if (!names.length) return;
       let added = 0;
       for (const n of names) {
@@ -192,7 +184,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       if (added > 0) {
         await refreshAll();
-        toast("ok", `Đã thêm sẵn ${added} danh mục Skincare`, "Giờ thêm sản phẩm nhớ chọn danh mục — câu review sẽ tự gợi ý đúng chu trình dưỡng da.");
+        toast("ok", `Đã thêm sẵn ${added} danh mục Skincare & Makeup`, "Chọn danh mục khi thêm sản phẩm — câu review mặc định sẽ tự điền, bạn sửa tùy ý.");
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -45,9 +45,9 @@ export function ReviewPopup() {
           <button
             onClick={() => setReviewProduct(null)}
             aria-label="Đóng"
-            className="absolute -right-1.5 -top-1.5 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-cyan-200 bg-white text-slate-500 shadow-card transition hover:text-cyan-600 hover:shadow-[0_0_18px_rgba(34,211,238,.55)] active:scale-90 dark:border-cyan-400/25 dark:bg-[#152A44] dark:text-slate-300"
+            className="absolute right-2 top-2 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-cyan-200 bg-white text-slate-600 shadow-[0_2px_10px_rgba(8,47,73,.35)] ring-2 ring-white/70 transition hover:text-cyan-600 hover:shadow-[0_0_18px_rgba(34,211,238,.55)] active:scale-90 dark:border-cyan-400/25 dark:bg-[#152A44] dark:text-slate-200 dark:ring-cyan-950/60"
           >
-            <svg viewBox="0 0 18 18" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+            <svg viewBox="0 0 18 18" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true">
               <path d="M4 4l10 10M14 4L4 14" />
             </svg>
           </button>
@@ -71,7 +71,7 @@ export function ReviewPopup() {
               onClick={() => !isAdmin && toggleGuestFav(p.id)}
               aria-label={isFav ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
               className={cn(
-                "absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full shadow-card backdrop-blur transition active:scale-90",
+                "absolute bottom-2 left-2 z-20 flex h-10 w-10 items-center justify-center rounded-full shadow-card backdrop-blur transition active:scale-90",
                 isFav ? "bg-pinky text-white" : "bg-white/80 text-cyan-600 hover:bg-white dark:bg-slate-900/70 dark:text-cyan-300"
               )}
             >

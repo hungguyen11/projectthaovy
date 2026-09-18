@@ -16,7 +16,7 @@ import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { api, ApiError } from "@/lib/api-client";
 import { extractFirstUrl } from "@/lib/metadata/link";
 import { MARKETPLACE_META, FALLBACK_IMAGE } from "@/lib/config";
-import { draftOwnerNote } from "@/lib/review-gen";
+import { CATEGORY_GROUPS, defaultReviewFor, draftOwnerNote } from "@/lib/review-gen";
 import { cn, formatVnd } from "@/lib/utils";
 import type { ExtractedMeta, ProductStatus } from "@/types";
 
@@ -36,6 +36,8 @@ export function AddProductModal() {
   const [manualImage, setManualImage] = useState("");
   const [note, setNote] = useState(""); // câu "chủ list mách" — soạn nháp tự động, sửa thoải mái
   const [noteVar, setNoteVar] = useState(0);
+  const [noteTouched, setNoteTouched] = useState(false); // admin tự sửa rồi → không điền đè nữa
+  const catNameOf = (id: string) => categories.find((c) => c.id === id)?.name ?? null;
   const [saving, setSaving] = useState(false);
   const fetchId = useRef(0);
 
@@ -50,6 +52,7 @@ export function AddProductModal() {
     setManualImage("");
     setNote("");
     setNoteVar(0);
+    setNoteTouched(false);
     setSaving(false);
   }, []);
 
@@ -57,9 +60,7 @@ export function AddProductModal() {
     if (addOpen) reset();
   }, [addOpen, reset]);
 
-  useEffect(() => {
-    if (addOpen && !categoryId && categories.length) setCategoryId(categories[0].id);
-  }, [addOpen, categories, categoryId]);
+  // KHÔNG tự chọn danh mục hộ admin — ô để trống cho tới khi tự bấm chọn (spec 2026-09)
 
   const fetchMeta = async () => {
     const v = url.trim();
@@ -81,8 +82,9 @@ export function AddProductModal() {
       const fetched = r.data;
       setMeta(fetched);
       setPhase("done");
-      // tự soạn NHÁP câu mách (admin có thể sửa/xóa — chỉ lưu khi bấm Lưu)
-      setNote((n) => n || draftOwnerNote({ title: fetched.title, priceLabel: fetched.price_label ?? null }));
+      // tự soạn NHÁP câu mách (admin có thể sửa/xóa — chỉ lưu khi bấm Lưu).
+      // Nếu danh mục đã chọn có review mặc định → ưu tiên đúng văn bản chủ list.
+      setNote((n) => n || draftOwnerNote({ title: fetched.title, category: catNameOf(categoryId), priceLabel: fetched.price_label ?? null }));
     } catch (e) {
       if (my !== fetchId.current) return;
       setPhase("error");
@@ -306,11 +308,40 @@ export function AddProductModal() {
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-muted" htmlFor="catSel">Danh mục</label>
-              <select id="catSel" className="input-field" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
+              <label className="mb-1.5 block text-xs font-semibold text-muted" htmlFor="catSel">
+                Danh mục <span className="font-normal">— bạn chọn, web không đoán</span>
+              </label>
+              <select
+                id="catSel"
+                className="input-field"
+                value={categoryId}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCategoryId(v);
+                  // review mặc định của danh mục — CHỈ điền khi admin chưa tự sửa ô review
+                  if (!noteTouched) {
+                    const def = defaultReviewFor(catNameOf(v));
+                    if (def) setNote(def);
+                  }
+                }}
+              >
+                <option value="">— Chọn danh mục —</option>
+                {CATEGORY_GROUPS.map((g) => {
+                  const inG = categories.filter((c) => g.names.some((n) => n.toLowerCase() === c.name.trim().toLowerCase()));
+                  if (!inG.length) return null;
+                  return (
+                    <optgroup key={g.group} label={g.group}>
+                      {inG.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
+                {categories
+                  .filter((c) => !CATEGORY_GROUPS.some((g) => g.names.some((n) => n.toLowerCase() === c.name.trim().toLowerCase())))
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
               </select>
             </div>
             <div>
@@ -333,8 +364,11 @@ export function AddProductModal() {
             className="input-field min-h-[74px] resize-y"
             maxLength={240}
             value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="VD: tui dùng cái này oke nè, thơm lâu, màu đẹp. mấy bà dùng thử nha."
+            onChange={(e) => {
+              setNoteTouched(true);
+              setNote(e.target.value);
+            }}
+            placeholder="Chọn danh mục ở trên là câu mặc định tự hiện here — xóa/viết lại tùy thích, web lưu đúng chữ bạn thấy lúc bấm Lưu."
             aria-label="Câu mách hiển thị khi người xem bấm vào tên sản phẩm"
           />
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -350,11 +384,13 @@ export function AddProductModal() {
                 setNote(
                   draftOwnerNote({
                     title: meta?.title || manualTitle,
+                    category: catNameOf(categoryId),
                     priceLabel: meta?.price_label ?? null,
                     variant: noteVar + 1,
                   })
                 );
                 setNoteVar((v) => v + 1);
+                setNoteTouched(true); // đổi tay rồi thì chọn danh mục khác không đè lên nữa
               }}
             >
               <Sparkles className="h-3.5 w-3.5" /> Viết câu khác

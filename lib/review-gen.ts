@@ -6,6 +6,102 @@
  * © _hngnguynn_
  */
 
+/* ══════════ HỆ DANH MỤC + REVIEW MẶC ĐỊNH (đúng văn bản chủ list cung cấp 2026-09) ══════════
+ * Danh mục chỉ là "nội dung điền sẵn" — mỗi sản phẩm lưu review RIÊNG của mình. */
+
+export interface CategoryGroup {
+  group: string;
+  names: string[];
+}
+
+export const CATEGORY_GROUPS: CategoryGroup[] = [
+  {
+    group: "SKINCARE",
+    names: [
+      "Tẩy trang",
+      "Sữa rửa mặt",
+      "Tẩy tế bào chết",
+      "Toner",
+      "Xịt khoáng",
+      "Essence",
+      "Serum",
+      "Mặt nạ",
+      "Kem mắt",
+      "Kem dưỡng ẩm",
+      "Dầu dưỡng da",
+      "Kem chống nắng",
+    ],
+  },
+  {
+    group: "MAKEUP",
+    names: [
+      "Kem lót",
+      "Kem nền",
+      "Kem che khuyết điểm",
+      "Phấn phủ",
+      "Tạo khối",
+      "Phấn má hồng",
+      "Bắt sáng",
+      "Chì kẻ mày",
+      "Phấn mắt",
+      "Kẻ mắt",
+      "Mascara",
+      "Son dưỡng môi",
+      "Chì kẻ viền môi",
+      "Son môi",
+      "Xịt khóa nền",
+    ],
+  },
+];
+
+/** Danh mục đầy đủ cần gieo (27 món) — admin đăng nhập là app thêm sẵn 1 lần. */
+export const SEED_CATEGORIES: string[] = CATEGORY_GROUPS.flatMap((g) => g.names);
+
+/** Review MẶC ĐỊNH theo danh mục (nguyên văn chủ list). Chỉ dùng để ĐIỀN SẴN — sửa/xóa thoải mái. */
+export const DEFAULT_REVIEWS: Record<string, string> = {
+  "Tẩy trang": "Không makeup vẫn phải tẩy nha bà, mặt mình đi đường hứng đủ thứ rồi 😭👇",
+  "Sữa rửa mặt": "Rửa xong mà mặt căng như bánh tráng là né liền nha =)))👇",
+  "Tẩy tế bào chết": "Tuần 1–2 lần thôi bà, đừng tẩy tới lúc da xin nghỉ việc 😭👇",
+  Toner: "Bôi vô thấy da dịu dịu, nhất là mấy hôm mặt khô queo 👇",
+  "Xịt khoáng": "Đi nắng về xịt cái là mát rượi, đã lắm bà =)))👇",
+  Essence: "Nhẹ mặt, không thích dính dính thì thử em này 👇",
+  Serum: "Cái này dễ nghiện lắm… vì càng xài càng muốn mua thêm 😭👇",
+  "Mặt nạ": "Đắp cho da với cho tâm hồn nó vui bà ơi =)))👇",
+  "Kem mắt": "Thức khuya ít thôi bà, kem mắt không cứu nổi đâu 😭👇",
+  "Kem dưỡng ẩm": "Serum xong nhớ khóa lại nha, đừng để da tự bơi =)))👇",
+  "Dầu dưỡng da": "Da khô thì mê, da dầu thì… từ từ bà 😭👇",
+  "Kem chống nắng": "Skincare gì thì skincare, sáng nhớ bôi em này trước nha 👇",
+  "Kem lót": "Có em này nền đỡ trôi hơn, nhất là bà nào da dầu 👇",
+  "Kem nền": "Hôm nào cần đẹp kỹ thì quất, chứ đi mua trà sữa thì thôi =)))👇",
+  "Kem che khuyết điểm": "Mụn vẫn còn nhưng mình có quyền giả vờ không thấy 😭👇",
+  "Phấn phủ": "Da dầu không có em này là dễ “bóng loáng” lắm bà 👇",
+  "Tạo khối": "Quẹt đúng thì thon, quẹt sai thì… thôi đừng nói 😭👇",
+  "Phấn má hồng": "Quẹt nhẹ cái mặt tươi hẳn lên luôn 👇",
+  "Bắt sáng": "Chấm nhẹ thôi bà, đừng để cả khu phố thấy mình phát sáng =)))👇",
+  "Chì kẻ mày": "Hai bên đều nhau là tự nhiên thấy đời đẹp hơn 😭👇",
+  "Phấn mắt": "Dặm nhẹ thôi cũng đủ xinh rồi bà 👇",
+  "Kẻ mắt": "Tay run thì thôi… hôm nay mình makeup kiểu tự nhiên =)))👇",
+  Mascara: "Chuốt mi cong lên cái mắt tỉnh hẳn 👀👇",
+  "Son dưỡng môi": "Môi khô mà đánh son lì là tự làm khổ mình đó bà 😭👇",
+  "Chì kẻ viền môi": "Kẻ nhẹ thôi nha, môi đầy chứ đừng thành môi mới =)))👇",
+  "Son môi": "Mặt có phờ cỡ nào, quẹt son vô là còn cứu được 😭👇",
+  "Xịt khóa nền": "Makeup lâu thì xịt, còn chạy đi mua đồ 5 phút thì khỏi bà =)))👇",
+};
+
+/** Tìm review mặc định theo tên danh mục (không phân biệt hoa thường/dấu cách thừa;
+ *  "Tẩy tế bào chết (1-2 lần/tuần)" vẫn khớp "Tẩy tế bào chết"). null = danh mục lạ → app tự soạn nháp. */
+export function defaultReviewFor(categoryName?: string | null): string | null {
+  const k = (categoryName || "").replace(/\s+/g, " ").trim().toLowerCase();
+  if (!k) return null;
+  for (const [name, txt] of Object.entries(DEFAULT_REVIEWS)) {
+    if (name.toLowerCase() === k) return txt;
+  }
+  for (const [name, txt] of Object.entries(DEFAULT_REVIEWS)) {
+    if (k.includes(name.toLowerCase())) return txt;
+  }
+  return null;
+}
+
 interface Kind {
   re: RegExp;
   label: string;
@@ -112,6 +208,10 @@ export function draftOwnerNote(o: {
   priceLabel?: string | null;
   variant?: number;
 }): string {
+  // danh mục quen thuộc → trả NGUYÊN VĂN review mặc định của chủ list (bấm "Viết lại" mới đổi giọng)
+  const def = defaultReviewFor(o.category);
+  if (def && (o.variant ?? 0) === 0) return def;
+
   const title = (o.title || "").replace(/\s+/g, " ").trim();
   const hay = deacc(`${title} ${o.category || ""}`);
   const kind = KINDS.find((k) => k.re.test(hay));

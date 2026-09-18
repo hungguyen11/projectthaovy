@@ -145,6 +145,7 @@ export function BulkImportModal() {
               owner_note: draftTitle
                 ? draftOwnerNote({
                     title: draftTitle,
+                    category: categories.find((c) => c.id === catId)?.name ?? null,
                     priceLabel: typeof snap.price_label === "string" ? snap.price_label : null,
                   })
                 : null,
