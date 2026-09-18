@@ -50,7 +50,8 @@ export function extractPrices(text: string): { price: number | null; label: stri
   const min = Math.min(...vals);
   const max = Math.max(...vals);
   const raw = text.match(/(\d{1,3}(?:\.\d{3})+|\d{4,})\s?(?:₫|đ)(?:\s*[–—-]\s*\d{1,3}(?:\.\d{3})+)?/i);
-  return { price: min, label: raw ? stripTags(raw[0]) : min + "₫" };
+  // giá khoảng → lấy số CAO NHẤT (đồng bộ quy tắc với parseMetadata — spec 2026-09)
+  return { price: max, label: raw ? stripTags(raw[0]) : min + "₫" };
 }
 
 function cleanTitle(t: string): string {

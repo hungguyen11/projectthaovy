@@ -195,8 +195,12 @@ export function parseMetadata(html: string, baseUrl: string): ParsedMeta {
   const pSingle = parsePriceString(single);
 
   if (pLow != null && pHigh != null && pLow !== pHigh && low && high) {
-    price = Math.min(pLow, pHigh);
-    label = `${price.toLocaleString("vi-VN")}đ – ${Math.max(pLow, pHigh).toLocaleString("vi-VN")}đ`;
+    // quy tắc spec 2026-09: giá khoảng (vd 200k–280k) → lấy số CAO NHẤT để tính,
+    // price_label vẫn giữ nguyên khoảng gốc để hiển thị thật
+    const lo = Math.min(pLow, pHigh);
+    const hi = Math.max(pLow, pHigh);
+    price = hi;
+    label = `${lo.toLocaleString("vi-VN")}đ – ${hi.toLocaleString("vi-VN")}đ`;
   } else if (pSingle != null) {
     price = pSingle;
     label = single && String(single).includes("-") ? String(single) : null;

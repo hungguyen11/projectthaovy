@@ -134,9 +134,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addProduct = useCallback(
     async (input: NewProductInput) => {
       try {
-        await api("/api/products", { method: "POST", body: input });
+        const r = await api<{ review_saved?: boolean }>("/api/products", { method: "POST", body: input });
         await refreshAll();
-        toast("ok", "Đã lưu sản phẩm", "Món đồ đã nằm gọn trong list của bạn.");
+        toast(
+          "ok",
+          "Đã lưu sản phẩm",
+          r?.review_saved === false
+            ? "Lưu ý: chưa lưu được câu mách — chạy database/OWNER-NOTE.sql (Supabase → SQL Editor) 1 lần rồi dán lại nhé."
+            : "Món đồ đã nằm gọn trong list của bạn."
+        );
         return { ok: true };
       } catch (e) {
         if (e instanceof ApiError && e.code === "DUPLICATE") {

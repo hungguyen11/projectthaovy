@@ -1,8 +1,8 @@
 -- ════════════════════════════════════════════════════════════════
---  BẬT TÍNH NĂNG "CHỦ LIST MÁCH" (review trong pop-up khi người xem bấm tên)
---  Chạy 1 LẦN duy nhất: Supabase Dashboard → SQL Editor → New query → RUN.
---  KHÔNG chạy cũng không sao: web vẫn chạy y hệt, chỉ là câu review chưa
---  được lưu vào DB (app tự hiểu và không lỗi gì cả).
+--  BẬT TÍNH NĂNG "CHỦ LIST MÁCH" — chạy 1 LẦN để LƯU được câu review
+--  (chưa chạy thì web vẫn chạy bình thường, chỉ là câu mách chưa cất vào DB được)
+--  Cách chạy: Supabase Dashboard → chọn project → SQL Editor → New query
+--             → dán hết file này → Run → "Success. No rows returned" là xong.
 --  © _hngnguynn_
 -- ════════════════════════════════════════════════════════════════
 

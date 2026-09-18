@@ -2,12 +2,13 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { FileSpreadsheet, Plus, SlidersHorizontal, X } from "lucide-react";
+import { FileSpreadsheet, Plus, SlidersHorizontal, X, RefreshCw } from "lucide-react";
 import { useApp } from "@/components/providers/AppProvider";
 import { Button } from "@/components/ui/Button";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/EmptyState";
 import { ProductCard } from "@/components/products/ProductCard";
+import { RefreshPricesModal } from "@/components/products/RefreshPricesModal";
 import { cn } from "@/lib/utils";
 import { MARKETPLACE_META, STATUS_META } from "@/lib/config";
 import type { ProductStatus } from "@/types";
@@ -30,6 +31,7 @@ function ProductsView() {
   const { products, categories, loading, error, refreshAll, query, setQuery, setAddOpen, setBulkOpen, isAdmin } = useApp();
   const [chip, setChip] = useState<(typeof STATUS_KEYS)[number]>("ALL");
   const [panel, setPanel] = useState(false);
+  const [priceOpen, setPriceOpen] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,6 +97,9 @@ function ProductsView() {
         </div>
         {isAdmin ? (
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setPriceOpen(true)}>
+              <RefreshCw className="h-4 w-4" /> Đồng bộ giá
+            </Button>
             <Button size="sm" variant="soft" onClick={() => setBulkOpen(true)}>
               <FileSpreadsheet className="h-4 w-4" /> Nhập hàng loạt
             </Button>
@@ -231,6 +236,8 @@ function ProductsView() {
           }
         />
       )}
+
+      <RefreshPricesModal open={priceOpen} onClose={() => setPriceOpen(false)} />
     </div>
   );
 }

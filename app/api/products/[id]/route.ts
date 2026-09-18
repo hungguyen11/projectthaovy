@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { requireAdmin, jsonError, route } from "@/lib/session";
+import { isMissingOwnerNote } from "@/lib/db-compat";
 import type { ProductStatus } from "@/types";
 
 export const runtime = "nodejs";
@@ -35,19 +36,29 @@ async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string
   // mọi field metadata (tên/giá/ảnh/url) đều KHÔNG cho sửa — spec §24
   if (!Object.keys(patch).length) return jsonError(400, "NO_FIELDS", "Không có thay đổi để cập nhật.");
 
-  const { data, error } = await supabase
-    .from("products")
-    .update(patch)
-    .eq("id", id)
-    .select("*, category:categories(id,name)")
-    .maybeSingle();
+  const runPatch = () =>
+    supabase
+      .from("products")
+      .update(patch)
+      .eq("id", id)
+      .select("*, category:categories(id,name)")
+      .maybeSingle();
 
-  if (error) {
-    if ((error as { code?: string }).code === "42703") {
-      return jsonError(409, "REVIEW_OFF", "Cột review chưa có trong DB — chạy database/OWNER-NOTE.sql (1 lần, trong SQL Editor) rồi thử lại.");
+  let { data, error } = await runPatch();
+  // DB chưa có cột owner_note → bỏ review, vẫn lưu được status/danh mục; nếu chỉ có review thì báo rõ cách bật
+  if (error && isMissingOwnerNote(error) && "owner_note" in patch) {
+    delete patch.owner_note;
+    if (!Object.keys(patch).length) {
+      return jsonError(
+        409,
+        "REVIEW_OFF",
+        "Chưa lưu được câu mách: database chưa có chỗ chứa. Mở Supabase → SQL Editor → dán nội dung file database/OWNER-NOTE.sql (5 dòng) → RUN, rồi bấm Lưu lại nhé."
+      );
     }
-    return jsonError(500, "DB", "Không thể cập nhật sản phẩm. Vui lòng thử lại.");
+    ({ data, error } = await runPatch());
   }
+
+  if (error) return jsonError(500, "DB", "Không thể cập nhật sản phẩm. Vui lòng thử lại.");
   if (!data) return jsonError(404, "NOT_FOUND", "Không tìm thấy sản phẩm.");
   return Response.json({ product: data });
 }

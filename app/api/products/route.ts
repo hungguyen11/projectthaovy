@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireAdmin, jsonError, route } from "@/lib/session";
 import { publicReadClient } from "@/lib/public-feed";
+import { isMissingOwnerNote } from "@/lib/db-compat";
 import { validateUrl } from "@/lib/metadata/ssrf";
 import { detectMarketplace } from "@/lib/config";
 import { normalizeUrl } from "@/lib/utils";
@@ -106,37 +107,32 @@ async function __POST(request: NextRequest) {
     );
   }
 
-  const { data: inserted, error: insertErr } = await (() => {
-    const row: Record<string, unknown> = {
-      user_id: user.id,
-      source_url: sourceUrl,
-      marketplace: typeof snap.marketplace === "string" ? String(snap.marketplace) : detectMarketplace(sourceUrl),
-      image_url,
-      product_name,
-      price,
-      price_label,
-      status,
-      category_id,
-    };
-    const note =
-      typeof body.owner_note === "string" ? body.owner_note.replace(/\s+/g, " ").trim().slice(0, 240) : "";
-    const doInsert = (r: Record<string, unknown>) =>
-      supabase.from("products").insert(r).select("*, category:categories(id,name)").single();
-    // DB chưa có cột owner_note (chưa chạy OWNER-NOTE.sql) → tự lưu KHÔNG kèm review, không sập
-    if (note) {
-      row.owner_note = note;
-      return doInsert(row).then(async (res) => {
-        if ((res.error as { code?: string } | null)?.code === "42703") {
-          delete row.owner_note;
-          return doInsert(row);
-        }
-        return res;
-      });
-    }
-    return doInsert(row);
-  })();
-  const data = inserted;
-  const error = insertErr;
+  const row: Record<string, unknown> = {
+    user_id: user.id,
+    source_url: sourceUrl,
+    marketplace: typeof snap.marketplace === "string" ? String(snap.marketplace) : detectMarketplace(sourceUrl),
+    image_url,
+    product_name,
+    price,
+    price_label,
+    status,
+    category_id,
+  };
+  const note =
+    typeof body.owner_note === "string" ? body.owner_note.replace(/\s+/g, " ").trim().slice(0, 240) : "";
+  if (note) row.owner_note = note;
+
+  const doInsert = (r: Record<string, unknown>) =>
+    supabase.from("products").insert(r).select("*, category:categories(id,name)").single();
+
+  // DB chưa có cột owner_note (chưa chạy OWNER-NOTE.sql) → tự lưu KHÔNG kèm review, không sập
+  let reviewSaved = true;
+  let { data, error } = await doInsert(row);
+  if (error && isMissingOwnerNote(error) && note) {
+    delete row.owner_note;
+    reviewSaved = false;
+    ({ data, error } = await doInsert(row));
+  }
 
   if (error) {
     if (error.code === "23505") {
@@ -152,7 +148,7 @@ async function __POST(request: NextRequest) {
     }
     return jsonError(500, "DB", "Không thể lưu sản phẩm. Vui lòng thử lại.");
   }
-  return Response.json({ product: data as Product }, { status: 201 });
+  return Response.json({ product: data as Product, review_saved: reviewSaved }, { status: 201 });
 }
 
 function safePath(u: string): string {

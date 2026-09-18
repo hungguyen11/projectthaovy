@@ -234,3 +234,8 @@ Supabase → **Authentication → URL Configuration**:
 - Khi thêm sản phẩm: ô "Câu mách của bạn" đã có sẵn câu gợi ý — sửa/xóa/tự viết đều được.
 - Khi nhập hàng loạt: mỗi món tự có câu nháp, vào Chi tiết → "Gợi ý câu" để đổi, bấm Lưu review khi duyệt.
 - Người xem bấm vào TÊN sản phẩm → pop-up: ảnh → câu mách → Mua ngay.
+- Nếu admin lưu review gặp lỗi "Chưa lưu được câu mách" hoặc "Không thể cập nhật" → **chưa chạy OWNER-NOTE.sql**; chạy xong lưu lại bình thường.
+## Đồng bộ giá (nút mới cho admin ở trang Sản phẩm)
+- Bấm "Đồng bộ giá" → web tự fetch lại giá hiện hành của TẤT CẢ món theo link gốc;
+  giá khoảng lấy số CAO NHẤT (vd 200k–280k → 280k); món nào sàn chặn/không trả giá
+  sẽ giữ giá cũ (không bịa). Chạy được giữa chừng, có nút Dừng.

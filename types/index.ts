@@ -33,7 +33,7 @@ export interface Product {
   marketplace: Marketplace;
   image_url: string | null;
   product_name: string;
-  /** Giá dùng để tính toán (số nhỏ nhất trong khoảng, nếu có range) */
+  /** Giá dùng để tính toán (số CAO NHẤT trong khoảng, nếu có range — spec 2026-09) */
   price: number | null;
   /** Chuỗi hiển thị gốc, ví dụ "299.000đ – 499.000đ" — không tự bịa giá */
   price_label: string | null;

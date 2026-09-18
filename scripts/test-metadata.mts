@@ -31,7 +31,7 @@ await ok(
     const r = parseMetadata(html, BASE);
     assert.equal(r.title, "Giày sneaker nữ basic");
     assert.equal(r.image, "https://cf.shopee.vn/file/abc.jpg");
-    assert.equal(r.price, 299000);
+    assert.equal(r.price, 499000); // range → lấy số cao nhất (spec 2026-09)
     assert.equal(r.price_label, "299.000đ – 499.000đ");
   }
 )();
@@ -196,7 +196,7 @@ await ok(
   "extractPrices — dạng giá Việt Nam",
   () => {
     assert.equal(extractPrices("Giá chỉ 129.000₫ giảm 34%").price, 129000);
-    assert.equal(extractPrices("299.000đ – 499.000đ").price, 299000);
+    assert.equal(extractPrices("299.000đ – 499.000đ").price, 499000); // range → cao nhất
     assert.equal(extractPrices("shop bán 1.290.000 đồng mỗi cái").price, 1290000);
     assert.equal(extractPrices("999 người đã bán").price, null); // dưới ngưỡng hàng thật
     assert.equal(extractPrices("mã 1234567 thường").price, null); // không có đơn vị
