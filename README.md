@@ -49,9 +49,7 @@ Bản quyền **© _hngnguynn_** (footer trang public + mọi trang trong app + 
 
 ```
 ProjectThaoVy/
-├── index.html            ← PREVIEW độc lập (double-click là chạy, KHÔNG cần Node/Supabase)
-├── style.css             ← design system của preview (chung token với app thật)
-├── script.js             ← logic preview (localStorage, demo metadata, đủ mọi luồng)
+├── app/                  ← (xem bên dưới)
 │
 ├── app/                  ← Next.js App Router (bản production)
 │   ├── page.tsx              landing công khai (+ SEO/OG/Twitter)
@@ -70,19 +68,6 @@ ProjectThaoVy/
 ├── .env.example          hướng dẫn key · .gitignore (không commit secret)
 └── package.json / tsconfig.json / next.config.ts / tailwind.config.ts
 ```
-
----
-
-# 🚀 Chạy NHANH bằng bản preview (5 giây)
-
-Không cần Node.js, npm, Supabase, database, backend:
-
-1. **Double-click `index.html`** → mở trong trình duyệt.
-2. Bấm *Bắt đầu sử dụng* (modal demo) → dùng thử **toàn bộ luồng**: thêm sản phẩm bằng link,
-   lấy metadata (mô phỏng), chọn danh mục/trạng thái, tìm kiếm, lọc, sắp xếp, đổi trạng thái,
-   đánh dấu đã mua, xóa, dark mode, mobile layout (thử thu hẹp cửa sổ), admin demo.
-3. Dữ liệu lưu trong `localStorage` của bạn. Preview có nhãn **DEMO DATA**; metadata trong
-   preview chỉ là mô phỏng — production xử lý bằng backend.
 
 ---
 
@@ -262,8 +247,8 @@ npm run build          # production build
 npm start              # chạy bản build
 ```
 
-Preview `index.html` đã kiểm thử tự động bằng jsdom: 39/39 luồng (thêm/trùng/retry/xóa/lọc/sắp
-xếp/ngân sách/danh mục/theme/admin/persistence) — không lỗi runtime.
+(Bản preview offline 1-file từng dùng ở các vòng đầu đã tách khỏi repo deploy — app thật luôn
+chạy bằng Next.js ở trên.)
 
 ---
 

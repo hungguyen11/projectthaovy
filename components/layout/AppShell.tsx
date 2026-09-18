@@ -9,6 +9,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { AddProductModal } from "@/components/products/AddProductModal";
 import { BulkImportModal } from "@/components/products/BulkImportModal";
 import { ProductDetailModal } from "@/components/products/ProductDetailModal";
+import { ReviewPopup } from "@/components/products/ReviewPopup";
 import { ConfigNotice } from "@/components/ConfigNotice";
 import { applyAccent, getAccent } from "@/lib/accent";
 
@@ -60,6 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <AddProductModal />
       <BulkImportModal />
       <ProductDetailModal />
+      <ReviewPopup />
     </AppProvider>
   );
 }

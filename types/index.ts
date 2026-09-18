@@ -38,6 +38,9 @@ export interface Product {
   /** Chuỗi hiển thị gốc, ví dụ "299.000đ – 499.000đ" — không tự bịa giá */
   price_label: string | null;
   status: ProductStatus;
+  /** Câu "chủ list mách" — hiện trong pop-up khi người xem bấm vào tên SP (tùy chọn,
+   *  cần chạy database/OWNER-NOTE.sql; chưa có cột thì app bỏ qua im lặng, không lỗi) */
+  owner_note?: string | null;
   created_at: string;
   updated_at: string;
   category?: Pick<Category, "id" | "name"> | null;

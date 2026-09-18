@@ -228,3 +228,9 @@ Supabase → **Authentication → URL Configuration**:
 | Hết năm 1 Namecheap đòi tiền | Vào Domain List → tắt Auto-Renew (mất domain) hoặc trả ~$4.88/năm để giữ |
 
 > 🔐 **Nhắc lại lần cuối:** secret key (`sb_sec_...`) chỉ nằm trong `.env.local` (máy bạn) + Environment Variables của Vercel. Không dán vào chat/GitHub repo/frontend. Nếu lỡ commit → xoay (roll) key mới trong Supabase ngay.
+
+## Tính năng "Chủ list mách" (review trong pop-up người xem)
+- Chạy **database/OWNER-NOTE.sql** 1 lần trong SQL Editor để bật lưu câu review (KHÔNG chạy thì web vẫn chạy bình thường, app tự bỏ qua, không lỗi).
+- Khi thêm sản phẩm: ô "Câu mách của bạn" đã có sẵn câu gợi ý — sửa/xóa/tự viết đều được.
+- Khi nhập hàng loạt: mỗi món tự có câu nháp, vào Chi tiết → "Gợi ý câu" để đổi, bấm Lưu review khi duyệt.
+- Người xem bấm vào TÊN sản phẩm → pop-up: ảnh → câu mách → Mua ngay.

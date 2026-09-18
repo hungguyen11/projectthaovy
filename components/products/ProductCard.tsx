@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Star, Heart, ExternalLink } from "lucide-react";
+import { Check, Star, Heart, ExternalLink, Quote } from "lucide-react";
 import type { Product } from "@/types";
 import { MARKETPLACE_META, STATUS_META, FALLBACK_IMAGE } from "@/lib/config";
 import { cn, formatVnd } from "@/lib/utils";
@@ -15,7 +15,7 @@ import { useApp } from "@/components/providers/AppProvider";
  * © _hngnguynn_
  */
 export function ProductCard({ product, index = 0, compact = false }: { product: Product; index?: number; compact?: boolean }) {
-  const { patchProduct, setDetailProduct, isAdmin, guestFavs, toggleGuestFav } = useApp();
+  const { patchProduct, setDetailProduct, setReviewProduct, isAdmin, guestFavs, toggleGuestFav } = useApp();
   const st = STATUS_META[product.status];
   const mp = MARKETPLACE_META[product.marketplace] ?? MARKETPLACE_META.OTHER;
   const isFav = isAdmin ? product.status === "FAVORITE" : guestFavs.has(product.id);
@@ -72,8 +72,24 @@ export function ProductCard({ product, index = 0, compact = false }: { product: 
           ) : null}
         </div>
         <h4 className={cn("line-clamp-2 font-bold leading-snug tracking-tight", compact ? "text-[.8rem]" : "text-[.9rem] min-h-[2.6em]")}>
-          {product.product_name}
+          {isAdmin ? (
+            product.product_name
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => { stop(e); setReviewProduct(product); }}
+              className="cursor-pointer text-left hover:underline hover:decoration-dotted hover:underline-offset-2"
+              aria-label={`Xem mách nhỏ: ${product.product_name}`}
+            >
+              {product.product_name}
+            </button>
+          )}
         </h4>
+        {!isAdmin && product.owner_note ? (
+          <p className="-mt-1 flex items-center gap-1 text-[.68rem] font-extrabold text-teal-ink dark:text-teal-200">
+            <Quote className="h-3 w-3 flex-none" /> có mách nhỏ — bấm tên nè
+          </p>
+        ) : null}
         {hasPrice ? (
           <p className={cn("font-extrabold tracking-tight text-ink", compact ? "text-[.86rem]" : "text-[1rem]")}>
             {product.price_label || formatVnd(product.price)}

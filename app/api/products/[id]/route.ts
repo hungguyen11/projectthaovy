@@ -27,6 +27,11 @@ async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string
   if ("category_id" in body) {
     patch.category_id = typeof body.category_id === "string" && body.category_id ? body.category_id : null;
   }
+  if ("owner_note" in body) {
+    // câu mách của chủ list — cho phép sửa (KHÔNG phải metadata sàn)
+    const n = typeof body.owner_note === "string" ? body.owner_note.replace(/\s+/g, " ").trim().slice(0, 240) : "";
+    patch.owner_note = n || null;
+  }
   // mọi field metadata (tên/giá/ảnh/url) đều KHÔNG cho sửa — spec §24
   if (!Object.keys(patch).length) return jsonError(400, "NO_FIELDS", "Không có thay đổi để cập nhật.");
 
@@ -37,7 +42,12 @@ async function __PATCH(request: NextRequest, ctx: { params: Promise<{ id: string
     .select("*, category:categories(id,name)")
     .maybeSingle();
 
-  if (error) return jsonError(500, "DB", "Không thể cập nhật sản phẩm. Vui lòng thử lại.");
+  if (error) {
+    if ((error as { code?: string }).code === "42703") {
+      return jsonError(409, "REVIEW_OFF", "Cột review chưa có trong DB — chạy database/OWNER-NOTE.sql (1 lần, trong SQL Editor) rồi thử lại.");
+    }
+    return jsonError(500, "DB", "Không thể cập nhật sản phẩm. Vui lòng thử lại.");
+  }
   if (!data) return jsonError(404, "NOT_FOUND", "Không tìm thấy sản phẩm.");
   return Response.json({ product: data });
 }

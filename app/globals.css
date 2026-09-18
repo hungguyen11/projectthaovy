@@ -105,6 +105,11 @@ body {
 *::-webkit-scrollbar-track { background: transparent; }
 
 @layer components {
+  /* chữ "viết tay" cho tagline trong pop-up mách (mockup chủ web duyệt) */
+  .font-hand {
+    font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+    letter-spacing: 0.01em;
+  }
   .input-field {
     @apply w-full rounded-field border border-line bg-surface px-3.5 py-2.5 text-sm outline-none transition
       placeholder:text-muted/80 focus:border-teal focus:ring-4 focus:ring-teal/[.12];
@@ -204,6 +209,25 @@ body {
   100% { transform: scale(1); }
 }
 .fav-pop { animation: fav-pop 0.28s ease-in-out both; }
+
+/* — pop-up "chủ list mách": card nhẹ nhàng lơ lửng, nội dung vào so le, sao nở lần lượt,
+   vệt sáng chạy trên nút Mua ngay (giảm theo prefers-reduced-motion chung ở cuối file) — */
+@keyframes rp-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.rp-float { animation: rp-float 5.5s ease-in-out infinite; }
+@keyframes rp-rise { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
+.rp-rise { animation: rp-rise 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+@keyframes rp-star { 0% { opacity: 0; transform: scale(0.3) rotate(-30deg); } 70% { transform: scale(1.18) rotate(4deg); } 100% { opacity: 1; transform: none; } }
+.rp-star { animation: rp-star 0.34s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+@keyframes rp-draw { from { opacity: 0; transform: translate(6px, 3px) rotate(2deg); } to { opacity: 1; transform: rotate(-1.5deg); } }
+.rp-draw { animation: rp-draw 0.55s ease-out 0.35s both; transform: rotate(-1.5deg); }
+.rp-shine { position: relative; overflow: hidden; isolation: isolate; }
+.rp-shine::after {
+  content: ""; position: absolute; top: -30%; bottom: -30%; left: -30%; width: 32%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+  animation: rp-shine-sweep 3.2s ease-in-out 0.9s infinite;
+}
+@keyframes rp-shine-sweep { 0% { transform: translateX(0) skewX(-18deg); } 45%, 100% { transform: translateX(340%) skewX(-18deg); } }
 
 @keyframes floaty {
   0%, 100% { transform: translateY(0); }

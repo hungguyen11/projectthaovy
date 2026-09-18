@@ -7,7 +7,7 @@
  * Khi link không đọc được, chỉ cho phép thêm TÊN/ẢNH tùy chọn (không nhập giá).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertCircle, Lock, PencilLine, Plus, Search, TriangleAlert } from "lucide-react";
+import { AlertCircle, Lock, PencilLine, Plus, Search, Sparkles, TriangleAlert } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -16,6 +16,7 @@ import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { api, ApiError } from "@/lib/api-client";
 import { extractFirstUrl } from "@/lib/metadata/link";
 import { MARKETPLACE_META, FALLBACK_IMAGE } from "@/lib/config";
+import { draftOwnerNote } from "@/lib/review-gen";
 import { cn, formatVnd } from "@/lib/utils";
 import type { ExtractedMeta, ProductStatus } from "@/types";
 
@@ -33,6 +34,8 @@ export function AddProductModal() {
   const [status, setStatus] = useState<ProductStatus>("PENDING");
   const [manualTitle, setManualTitle] = useState("");
   const [manualImage, setManualImage] = useState("");
+  const [note, setNote] = useState(""); // câu "chủ list mách" — soạn nháp tự động, sửa thoải mái
+  const [noteVar, setNoteVar] = useState(0);
   const [saving, setSaving] = useState(false);
   const fetchId = useRef(0);
 
@@ -45,6 +48,8 @@ export function AddProductModal() {
     setStatus("PENDING");
     setManualTitle("");
     setManualImage("");
+    setNote("");
+    setNoteVar(0);
     setSaving(false);
   }, []);
 
@@ -73,8 +78,11 @@ export function AddProductModal() {
         setErrMsg(r.message || "Không thể lấy thông tin sản phẩm từ liên kết này.");
         return;
       }
-      setMeta(r.data);
+      const fetched = r.data;
+      setMeta(fetched);
       setPhase("done");
+      // tự soạn NHÁP câu mách (admin có thể sửa/xóa — chỉ lưu khi bấm Lưu)
+      setNote((n) => n || draftOwnerNote({ title: fetched.title, priceLabel: fetched.price_label ?? null }));
     } catch (e) {
       if (my !== fetchId.current) return;
       setPhase("error");
@@ -112,6 +120,7 @@ export function AddProductModal() {
         price_label: priceLabel,
         marketplace: meta?.marketplace,
       },
+      owner_note: note.trim() ? note.trim().slice(0, 240) : null,
     });
     setSaving(false);
     if (res.ok) {
@@ -310,6 +319,46 @@ export function AddProductModal() {
                 <StatusRadio value={status} onChange={setStatus} />
               </div>
             </div>
+          </div>
+
+          {/* BƯỚC 4 — câu mách của chủ list (tùy chọn) */}
+          <p className="mb-2.5 mt-5 flex items-center gap-2 text-sm font-extrabold">
+            <span className="flex h-[22px] w-[22px] items-center justify-center rounded-lg bg-teal-deep text-[.72rem] text-white">
+              {meta ? 4 : 3}
+            </span>
+            Câu mách của bạn
+            <span className="ml-auto text-[.68rem] font-semibold normal-case text-muted">không bắt buộc</span>
+          </p>
+          <textarea
+            className="input-field min-h-[74px] resize-y"
+            maxLength={240}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="VD: tui dùng cái này oke nè, thơm lâu, màu đẹp. mấy bà dùng thử nha."
+            aria-label="Câu mách hiển thị khi người xem bấm vào tên sản phẩm"
+          />
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <p className="min-w-0 flex-1 text-[.72rem] leading-snug text-muted">
+              Hiện trong pop-up khi người xem bấm vào tên sản phẩm — viết thật của mình nha, web không tự bịa giúp bạn được.
+            </p>
+            <span className="text-[.72rem] font-bold tabular-nums text-muted">{note.length}/240</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              type="button"
+              onClick={() => {
+                setNote(
+                  draftOwnerNote({
+                    title: meta?.title || manualTitle,
+                    priceLabel: meta?.price_label ?? null,
+                    variant: noteVar + 1,
+                  })
+                );
+                setNoteVar((v) => v + 1);
+              }}
+            >
+              <Sparkles className="h-3.5 w-3.5" /> Viết câu khác
+            </Button>
           </div>
         </>
       ) : null}

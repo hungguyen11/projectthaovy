@@ -14,6 +14,7 @@ import { useApp } from "@/components/providers/AppProvider";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { api, ApiError } from "@/lib/api-client";
+import { draftOwnerNote } from "@/lib/review-gen";
 import { extractLinks, MAX_LINKS } from "@/lib/extract-links";
 
 /**
@@ -132,9 +133,22 @@ export function BulkImportModal() {
           /* không lấy được metadata → server sẽ lưu link với tên dự phòng */
         }
         try {
+          const draftTitle = typeof snap.title === "string" ? snap.title : "";
           await api("/api/products", {
             method: "POST",
-            body: { source_url: url, status: "PENDING", category_id: catId || null, snapshot: snap },
+            body: {
+              source_url: url,
+              status: "PENDING",
+              category_id: catId || null,
+              snapshot: snap,
+              // tự soạn câu mách nháp cho từng món (admin duyệt/sửa lại sau trong Chi tiết)
+              owner_note: draftTitle
+                ? draftOwnerNote({
+                    title: draftTitle,
+                    priceLabel: typeof snap.price_label === "string" ? snap.price_label : null,
+                  })
+                : null,
+            },
           });
           setRow(i, {
             state: "saved",

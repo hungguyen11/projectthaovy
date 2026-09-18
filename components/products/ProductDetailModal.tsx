@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, ExternalLink, Heart, Star, Trash2, Bookmark } from "lucide-react";
+import { CheckCircle2, ExternalLink, Heart, Star, Trash2, Bookmark, Sparkles } from "lucide-react";
+import { draftOwnerNote } from "@/lib/review-gen";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { useApp } from "@/components/providers/AppProvider";
@@ -81,6 +82,10 @@ export function ProductDetailModal() {
             const res = await patchProduct(p.id, { category_id: catId });
             if (res) setDetailProduct(res);
           }}
+          onNote={async (v) => {
+            const res = await patchProduct(p.id, { owner_note: v });
+            if (res) setDetailProduct(res);
+          }}
         />
       ) : null}
     </Modal>
@@ -91,10 +96,12 @@ function DetailBody({
   product: p,
   onStatus,
   onCategory,
+  onNote,
 }: {
   product: Product;
   onStatus: (s: ProductStatus) => void;
   onCategory: (id: string | null) => void | Promise<void>;
+  onNote: (v: string | null) => void | Promise<void>;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
   const { categories } = useApp();
@@ -186,6 +193,13 @@ function DetailBody({
           </p>
         </div>
 
+        <div className="mt-4 rounded-[16px] border border-teal/25 bg-aqua-mist/50 p-4 dark:bg-teal-950/30">
+          <p className="mb-2 flex items-center gap-1.5 text-[.7rem] font-extrabold uppercase tracking-[.07em] text-teal-ink dark:text-teal-200">
+            <Sparkles className="h-3.5 w-3.5" /> Câu mách của chủ list — hiện khi khách bấm vào tên sản phẩm
+          </p>
+          <ReviewEditor key={p.id} product={p} onNote={onNote} />
+        </div>
+
         <p className="mb-2 mt-4 text-[.7rem] font-extrabold uppercase tracking-[.07em] text-muted">Chuyển trạng thái</p>
         <div className="flex flex-wrap gap-1.5">
           {statuses.map(({ k, icon: Icon }) => (
@@ -206,6 +220,65 @@ function DetailBody({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Ô viết/sửa câu mách — kèm nút gợi ý tự soạn; chỉ lưu khi admin bấm "Lưu review" */
+function ReviewEditor({
+  product,
+  onNote,
+}: {
+  product: Product;
+  onNote: (v: string | null) => void | Promise<void>;
+}) {
+  const [txt, setTxt] = useState(product.owner_note ?? "");
+  const [busy, setBusy] = useState(false);
+  const [variant, setVariant] = useState(0);
+  const dirty = txt !== (product.owner_note ?? "");
+  return (
+    <>
+      <textarea
+        className="input-field min-h-[70px] resize-y"
+        maxLength={240}
+        value={txt}
+        onChange={(e) => setTxt(e.target.value)}
+        placeholder="VD: tui dùng cái này oke nè, thơm lâu, màu đẹp. mấy bà dùng thử nha."
+        aria-label="Câu mách của chủ list"
+      />
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <span className="text-[.7rem] font-bold tabular-nums text-muted">{txt.length}/240</span>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => {
+            const v = variant + 1;
+            setVariant(v);
+            setTxt(
+              draftOwnerNote({
+                title: product.product_name,
+                category: product.category?.name ?? null,
+                priceLabel: product.price_label,
+                variant: v,
+              })
+            );
+          }}
+        >
+          <Sparkles className="h-3.5 w-3.5" /> Gợi ý câu
+        </Button>
+        <Button
+          size="sm"
+          className="ml-auto"
+          disabled={!dirty || busy}
+          onClick={async () => {
+            setBusy(true);
+            await onNote(txt.trim() ? txt.trim().slice(0, 240) : null);
+            setBusy(false);
+          }}
+        >
+          Lưu review
+        </Button>
+      </div>
+    </>
   );
 }
 

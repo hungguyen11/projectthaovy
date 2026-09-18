@@ -106,9 +106,8 @@ async function __POST(request: NextRequest) {
     );
   }
 
-  const { data, error } = await supabase
-    .from("products")
-    .insert({
+  const { data: inserted, error: insertErr } = await (() => {
+    const row: Record<string, unknown> = {
       user_id: user.id,
       source_url: sourceUrl,
       marketplace: typeof snap.marketplace === "string" ? String(snap.marketplace) : detectMarketplace(sourceUrl),
@@ -118,9 +117,26 @@ async function __POST(request: NextRequest) {
       price_label,
       status,
       category_id,
-    })
-    .select("*, category:categories(id,name)")
-    .single();
+    };
+    const note =
+      typeof body.owner_note === "string" ? body.owner_note.replace(/\s+/g, " ").trim().slice(0, 240) : "";
+    const doInsert = (r: Record<string, unknown>) =>
+      supabase.from("products").insert(r).select("*, category:categories(id,name)").single();
+    // DB chưa có cột owner_note (chưa chạy OWNER-NOTE.sql) → tự lưu KHÔNG kèm review, không sập
+    if (note) {
+      row.owner_note = note;
+      return doInsert(row).then(async (res) => {
+        if ((res.error as { code?: string } | null)?.code === "42703") {
+          delete row.owner_note;
+          return doInsert(row);
+        }
+        return res;
+      });
+    }
+    return doInsert(row);
+  })();
+  const data = inserted;
+  const error = insertErr;
 
   if (error) {
     if (error.code === "23505") {

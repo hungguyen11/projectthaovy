@@ -15,6 +15,7 @@ export function Modal({
   title,
   icon,
   size = "md",
+  glow = false,
   children,
   footer,
 }: {
@@ -23,6 +24,8 @@ export function Modal({
   title?: React.ReactNode;
   icon?: React.ReactNode;
   size?: "md" | "lg";
+  /** quầng sáng cyan quanh card (pop-up "chủ list mách") */
+  glow?: boolean;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
@@ -59,7 +62,12 @@ export function Modal({
   if (typeof document === "undefined" || !shown) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[150] flex items-end justify-center p-0 md:items-center md:p-4">
+    <div
+      className={cn(
+        "fixed inset-0 z-[150] flex justify-center",
+        glow ? "items-center p-3" : "items-end p-0 md:items-center md:p-4"
+      )}
+    >
       <div
         className={cn("absolute inset-0 bg-[#0A0F1E]/50", closing ? "fade-out" : "fade-in")}
         onClick={onClose}
@@ -71,7 +79,11 @@ export function Modal({
           "relative flex max-h-[92dvh] w-full flex-col bg-surface shadow-pop",
           "rounded-t-[22px] border border-line md:rounded-[22px] md:max-h-[min(88dvh,860px)]",
           closing ? "modal-out" : "modal-in",
-          size === "lg" ? "md:max-w-[660px]" : "md:max-w-[560px]"
+          glow
+            ? "border-0 bg-transparent p-0 shadow-none md:max-w-[480px]"
+            : size === "lg"
+              ? "md:max-w-[660px]"
+              : "md:max-w-[560px]"
         )}
       >
         {title != null ? (
@@ -89,7 +101,7 @@ export function Modal({
             </button>
           </div>
         ) : null}
-        <div className="overflow-y-auto px-5 py-4">{children}</div>
+        <div className={cn("overflow-y-auto", glow ? "p-0" : "px-5 py-4")}>{children}</div>
         {footer ? (
           <div className="flex justify-end gap-2.5 rounded-b-[22px] border-t border-line bg-bg/60 px-5 py-3.5">{footer}</div>
         ) : null}

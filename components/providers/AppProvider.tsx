@@ -22,6 +22,8 @@ export interface NewProductInput {
   category_id: string | null;
   status: ProductStatus;
   snapshot: Partial<ExtractedMeta>;
+  /** câu mách của chủ list (tùy chọn) */
+  owner_note?: string | null;
 }
 
 interface AppCtx {
@@ -35,7 +37,7 @@ interface AppCtx {
 
   refreshAll: () => Promise<void>;
   addProduct: (input: NewProductInput) => Promise<{ ok: boolean; duplicate?: Product; message?: string }>;
-  patchProduct: (id: string, patch: { status?: ProductStatus; category_id?: string | null }) => Promise<Product | null>;
+  patchProduct: (id: string, patch: { status?: ProductStatus; category_id?: string | null; owner_note?: string | null }) => Promise<Product | null>;
   deleteProduct: (id: string) => Promise<boolean>;
 
   createCategory: (name: string) => Promise<Category | null>;
@@ -52,6 +54,9 @@ interface AppCtx {
   setBulkOpen: (v: boolean) => void;
   detailProduct: Product | null;
   setDetailProduct: (p: Product | null) => void;
+  /** pop-up "chủ list mách" cho NGƯỜI XEM khi bấm vào tên sản phẩm */
+  reviewProduct: Product | null;
+  setReviewProduct: (p: Product | null) => void;
 
   stats: { total: number; PENDING: number; PRIORITY: number; FAVORITE: number; PURCHASED: number };
 }
@@ -99,6 +104,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [addOpen, setAddOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
+  const [reviewProduct, setReviewProduct] = useState<Product | null>(null);
 
   const refreshAll = useCallback(async () => {
     setError(null);
@@ -145,7 +151,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const patchProduct = useCallback(
-    async (id: string, patch: { status?: ProductStatus; category_id?: string | null }) => {
+    async (id: string, patch: { status?: ProductStatus; category_id?: string | null; owner_note?: string | null }) => {
       // optimistic update cho mượt
       const snapshot = products;
       setProducts((ps) => ps.map((p) => (p.id === id ? { ...p, ...patch } : p)));
@@ -238,7 +244,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshAll, addProduct, patchProduct, deleteProduct,
       createCategory, renameCategory, deleteCategory,
       isAdmin, guestFavs, toggleGuestFav,
-      addOpen, setAddOpen, bulkOpen, setBulkOpen, detailProduct, setDetailProduct, stats,
+      addOpen, setAddOpen, bulkOpen, setBulkOpen, detailProduct, setDetailProduct,
+      reviewProduct, setReviewProduct, stats,
     }),
     [
       profile, products, categories, loading, error,
@@ -246,7 +253,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshAll, addProduct, patchProduct, deleteProduct,
       createCategory, renameCategory, deleteCategory,
       isAdmin, guestFavs,
-      addOpen, bulkOpen, detailProduct, stats,
+      addOpen, bulkOpen, detailProduct, reviewProduct, stats,
     ]
   );
 
