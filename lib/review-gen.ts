@@ -23,6 +23,14 @@ function deacc(s: string): string {
 }
 
 const KINDS: Kind[] = [
+  { re: /ta\s?y? ?trang|micellar|makeup remover|nuoc ta\b/, label: "nước tẩy trang", praise: ["lau sạch kem chống nắng cả ngày, không cay mắt", "một miếng là sạch, da không khô căng sau đó"] },
+  { re: /sua rua mat|cleanser|rua mat/, label: "sữa rửa mặt", praise: ["bọt mịn, rửa xong da dịu mà sạch sâu", "kiên trì sáng-tối là lỗ chân lông thoáng hẳn"] },
+  { re: /toner|nuoc can bang/, label: "em toner", praise: ["vỗ lên là da dịu ngay, cấp ẩm nhẹ vừa đủ"] },
+  { re: /retinol|tretinoin|tretin|diffacin|kem tri|dac tri|\bmun\b|acne|đặc trị|mụn/, label: "kem đặc trị", praise: ["kiên trì 3-4 tuần là thấy khác, nhớ chống nắng kỹ", "giai đoạn đầu hơi khô da rồi quen, chấm đúng điểm mụn"] },
+  { re: /ta(?:y)? bao chet|te bao chet|peeling|scrub|exfoliat|\baha\b|\bbha\b/, label: "tẩy da chết", praise: ["1-2 lần/tuần da mịn hẳn, không rát", "đừng tham số, 2 lần/tuần là đủ đẹp"] },
+  { re: /serum|tinh chat|ampoule|vitamin c|niacinamide/, label: "em serum", praise: ["thấm nhanh, sáng dậy da mướt hơn hẳn", "kiên trì 2 tuần là thấy khác"] },
+  { re: /kem duong am|moisturizer|duong am|cream\b/, label: "kem dưỡng ẩm", praise: ["khóa ẩm ổn, sáng dậy da mềm, không bết", "chất kem mỏng nhẹ, dùng kèm các bước khác không bị vón"] },
+  { re: /chong nang|sunscreen|spf|sunstick/, label: "kem chống nắng", praise: ["không nâng tone, không bết, đủ cho cả ngày dài", "thoa lại giữa ngày dễ, không trắng bệch"] },
   { re: /nuoc hoa|perfume|fragrance/, label: "mùi hương", praise: ["thơm dịu mà bám lâu, tới chiều vẫn còn phảng phất", "lên mùi sang, không gắt mũi", "xịt 2 tia là đủ thơm nhẹ cả ngày"] },
   { re: /\bson\b|lipstick|lip balm|moi\b/, label: "em son", praise: ["màu lên chuẩn như swatch, môi không khô", "chất mượt, đánh lòng môi xinh lắm"] },
   { re: /serum|kem duong|chong nang|mat na|rua mat|skincare/, label: "em skincare", praise: ["thấm nhanh, sáng dậy da mềm hơn hẳn", "không bết rít, da dầu dùng ổn áp"] },
@@ -60,6 +68,15 @@ const OPENERS = [
 /** Câu "tagline viết tay" ngắn cho góc ảnh sản phẩm (theo mockup pop-up).
  *  null = không nhận diện được loại → app ẩn tagline, không bịa cho có. */
 const CATCHPHRASES: Array<[RegExp, string]> = [
+  [/ta\s?y? ?trang|micellar|makeup remover/, "Sạch sâu, không cay mắt"],
+  [/sua rua mat|rua mat|cleanser/, "Rửa xong không khô căng"],
+  [/toner|nuoc can bang/, "Dịu da tức thì"],
+  [/retinol|tretinoin|diffacin|kem tri|dac tri|\bmun\b|acne/, "Chân ái da mụn"],
+  [/ta(?:y)? bao chet|te bao chet|peeling|scrub|exfoliat|\baha\b|\bbha\b/, "Lỗ chân lông thoáng hẳn"],
+  [/serum|tinh chat|ampoule/, "Thấm nhanh, da mướt"],
+  [/kem duong am|moisturizer|duong am/, "Khóa ẩm cả đêm"],
+  [/chong nang|sunscreen|spf/, "Không bết, không nâng tone"],
+  [/mat na|mask/, "Cấp ẩm cấp tốc"],
   [/tai nghe|headphone|earbuds|airpods/, "Âm thanh cực hay"],
   [/nuoc hoa|perfume|fragrance/, "Thơm cả ngày không rời"],
   [/\bson\b|lipstick/, "Lên màu xinh xỉu"],

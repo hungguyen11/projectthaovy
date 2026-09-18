@@ -1,15 +1,16 @@
 "use client";
 
 /**
- * "Đồng bộ giá tất cả sản phẩm" — admin bấm một cái:
- *   từng món được gửi lên /api/products/:id/price → SERVER tự fetch lại link gốc,
- *   lấy giá hiện tại (range → lấy số CAO NHẤT) và cập nhật.
- * Nguyên tắc: KHÔNG bịa giá — món nào sàn chặn/không trả giá thì GIỮ giá cũ,
- * trên danh sách hiện rõ lý do. Có nút Dừng giữa chừng, xong việc tự làm mới trang.
+ * "Đồng bộ giá + câu mách" — admin bấm một cái, web làm từng món một:
+ *   1) gửi lên /api/products/:id/price → SERVER tự fetch lại link gốc,
+ *      lấy giá hiện hành (range → lấy số CAO NHẤT) và cập nhật;
+ *   2) món nào CHƯA có câu mách → tự soạn NHÁP theo tên + danh mục (admin duyệt lại sau được);
+ *   3) nguyên tắc: KHÔNG bịa giá — sàn chặn/không trả giá thì GIỮ giá cũ, hiện rõ lý do.
+ * Có nút Dừng giữa chừng, xong việc tự làm mới trang.
  * © _hngnguynn_
  */
 import { useCallback, useRef, useState } from "react";
-import { Ban, Check, CircleAlert, Loader, Minus, RefreshCw } from "lucide-react";
+import { Ban, Check, CircleAlert, Loader, Minus, RefreshCw, Sparkles } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { useApp } from "@/components/providers/AppProvider";
@@ -28,6 +29,9 @@ interface Row {
 interface PriceRes {
   updated: boolean;
   reason?: string;
+  detail?: string;
+  priceChanged?: boolean;
+  noteAdded?: boolean;
   old_price?: number | null;
   product?: { price?: number | null; price_label?: string | null };
 }
@@ -36,7 +40,7 @@ export function RefreshPricesModal({ open, onClose }: { open: boolean; onClose: 
   const { products, refreshAll, isAdmin } = useApp();
   const [rows, setRows] = useState<Row[]>([]);
   const [phase, setPhase] = useState<"ready" | "running" | "done">("ready");
-  const [stats, setStats] = useState({ updated: 0, same: 0, kept: 0, fail: 0 });
+  const [stats, setStats] = useState({ updated: 0, same: 0, kept: 0, fail: 0, notes: 0 });
   const cancelRef = useRef(false);
   const runRef = useRef(0);
 
@@ -50,7 +54,7 @@ export function RefreshPricesModal({ open, onClose }: { open: boolean; onClose: 
       return;
     }
     setRows(list.map((p) => ({ id: p.id, name: p.product_name, state: "wait" as RowState })));
-    setStats({ updated: 0, same: 0, kept: 0, fail: 0 });
+    setStats({ updated: 0, same: 0, kept: 0, fail: 0, notes: 0 });
     setPhase("running");
     cancelRef.current = false;
     const my = ++runRef.current;
@@ -58,6 +62,7 @@ export function RefreshPricesModal({ open, onClose }: { open: boolean; onClose: 
     let same = 0;
     let kept = 0;
     let fail = 0;
+    let notes = 0;
 
     for (let i = 0; i < list.length; i++) {
       if (cancelRef.current || my !== runRef.current) break;
@@ -66,25 +71,36 @@ export function RefreshPricesModal({ open, onClose }: { open: boolean; onClose: 
         const r = await api<PriceRes>(`/api/products/${list[i].id}/price`, { method: "POST" });
         if (r.updated) {
           updated++;
-          const old = r.old_price != null ? formatVnd(r.old_price) : "chưa có";
-          const nw =
-            r.product?.price_label || (r.product?.price != null ? formatVnd(r.product.price) : "");
-          setRow(i, { state: "ok", msg: `${old} → ${nw}` });
+          if (r.noteAdded) notes++;
+          const parts: string[] = [];
+          if (r.priceChanged) {
+            const old = r.old_price != null ? formatVnd(r.old_price) : "chưa có";
+            const nw = r.product?.price_label || (r.product?.price != null ? formatVnd(r.product.price) : "");
+            parts.push(`${old} → ${nw}`);
+          }
+          if (r.noteAdded) parts.push("đã soạn câu mách nháp");
+          setRow(i, { state: "ok", msg: parts.join(" · ") || "đã cập nhật" });
         } else if (r.reason === "SAME") {
           same++;
-          setRow(i, { state: "same", msg: "giá không đổi" });
+          setRow(i, { state: "same", msg: r.detail || "giá không đổi" });
+        } else if (r.reason === "DB") {
+          fail++;
+          setRow(i, { state: "fail", msg: r.detail || "lỗi DB — mở Cài đặt → Công khai → Kiểm tra ngay" });
         } else {
           kept++;
           setRow(i, {
             state: "kept",
-            msg: r.reason === "NO_PRICE" ? "sàn không trả giá — giữ giá cũ" : "sàn chặn bot — giữ giá cũ",
+            msg:
+              r.detail ||
+              (r.reason === "NO_PRICE" ? "sàn không trả giá — giữ giá cũ" : "sàn chặn/timeout — giữ giá cũ"),
           });
         }
       } catch (e) {
         fail++;
-        setRow(i, { state: "fail", msg: e instanceof ApiError ? e.message : "lỗi kết nối" });
+        const m = e instanceof ApiError ? e.message : "lỗi kết nối";
+        setRow(i, { state: "fail", msg: /đăng nhập/i.test(m) ? "hết phiên — đăng nhập lại rồi thử lại" : m });
       }
-      setStats({ updated, same, kept, fail });
+      setStats({ updated, same, kept, fail, notes });
       await new Promise((res) => setTimeout(res, 250));
     }
     setPhase("done");
@@ -104,7 +120,7 @@ export function RefreshPricesModal({ open, onClose }: { open: boolean; onClose: 
       }}
       title={
         <span className="flex items-center gap-2">
-          <RefreshCw className="h-[18px] w-[18px]" /> Đồng bộ giá
+          <RefreshCw className="h-[18px] w-[18px]" /> Đồng bộ giá &amp; câu mách
         </span>
       }
       size="md"
@@ -131,10 +147,10 @@ export function RefreshPricesModal({ open, onClose }: { open: boolean; onClose: 
       }
     >
       <p className="text-sm leading-relaxed text-muted">
-        Web sẽ <b className="text-ink">tự mở lại từng link</b> để lấy giá hiện hành của sản phẩm
-        (giá khoảng như 200.000đ – 280.000đ sẽ lấy <b className="text-ink">280.000đ</b>).
-        Món nào sàn chặn hoặc không trả giá thì <b className="text-ink">giữ nguyên giá cũ</b> — không bịa số.
-        Mỗi món mất khoảng 2–5 giây.
+        Mỗi món sẽ được <b className="text-ink">tự mở lại link</b> để lấy giá hiện hành
+        (giá khoảng như 200.000đ – 280.000đ → lấy <b className="text-ink">280.000đ</b>);
+        món nào <b className="text-ink">chưa có câu mách</b> sẽ được tự soạn nháp theo tên + danh mục.
+        Sàn chặn / không trả giá → <b className="text-ink">giữ nguyên giá cũ</b> — không bịa số. Mỗi món ~2–5 giây.
       </p>
 
       {rows.length > 0 ? (
@@ -143,6 +159,11 @@ export function RefreshPricesModal({ open, onClose }: { open: boolean; onClose: 
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
               <Check className="h-3 w-3" /> {stats.updated} cập nhật
             </span>
+            {stats.notes > 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-aqua-mist px-2.5 py-1 text-teal-ink dark:bg-teal-950 dark:text-teal-200">
+                <Sparkles className="h-3 w-3" /> {stats.notes} câu mách mới soạn
+              </span>
+            ) : null}
             <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
               <Minus className="h-3 w-3" /> {stats.same} không đổi
             </span>

@@ -34,13 +34,29 @@ async function __GET() {
 
     const channel = adminIds ? "admin-key" : "anon";
     const visible = guestCount ?? 0;
+
+    // Thăm dò cột cần thiết (không phụ thuộc RLS — lỗi "tìm không thấy cột" xảy ra ở tầng parse):
+    const columns: Record<string, boolean> = {};
+    for (const col of ["owner_note", "price", "price_label"]) {
+      try {
+        const r = await client.from("products").select(col).limit(1);
+        const errText = `${(r.error as { code?: string } | null)?.code ?? ""} ${(r.error as { message?: string } | null)?.message ?? ""}`;
+        columns[col] = !r.error || !/PGRST204|42703|does not exist|Could not find/i.test(errText);
+      } catch {
+        columns[col] = false;
+      }
+    }
+    const dbOk = columns.owner_note && columns.price && columns.price_label;
+
     return Response.json(
       {
         channel, // "admin-key" = đọc qua service key (mạnh nhất, không phụ thuộc RLS)
         admins, // số tài khoản role ADMIN trong DB
         guestVisible: visible, // số sản phẩm khách thực sự xem được
         adminTotal, // tổng sản phẩm của Admin trong DB (null nếu không có service key)
-        ok: !guestErr && visible > 0,
+        columns, // các cột tính năng có trong DB chưa
+        dbOk,
+        ok: !guestErr && visible > 0 && dbOk,
       },
       { headers: { "Cache-Control": "no-store" } }
     );

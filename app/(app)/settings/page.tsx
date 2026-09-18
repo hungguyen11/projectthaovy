@@ -256,6 +256,8 @@ function PublicCheckCard() {
     adminTotal?: number | null;
     admins?: number;
     ok?: boolean;
+    columns?: Record<string, boolean>;
+    dbOk?: boolean;
     err?: string;
   } | null>(null);
 
@@ -268,6 +270,8 @@ function PublicCheckCard() {
         guestVisible: number;
         adminTotal: number | null;
         ok: boolean;
+        columns?: Record<string, boolean>;
+        dbOk?: boolean;
       }>("/api/admin/public-check");
       setState(r);
     } catch (e) {
@@ -282,7 +286,7 @@ function PublicCheckCard() {
           Kiểm tra ngay
         </Button>
         {state && !state.loading && !state.err ? (
-          state.ok ? (
+          (state.guestVisible ?? 0) > 0 ? (
             <p className="inline-flex items-center gap-1.5 text-[.82rem] font-bold text-mint">
               <Check className="h-4 w-4" /> Người xem (không cần đăng nhập) đang thấy {state.guestVisible} sản phẩm
               {state.adminTotal != null && state.adminTotal !== state.guestVisible ? ` · trong DB có ${state.adminTotal}` : ""}
@@ -295,6 +299,20 @@ function PublicCheckCard() {
                 : state.admins === 0
                   ? " — chưa có tài khoản nào role ADMIN (chạy câu update profiles trong hướng dẫn)."
                   : " — kiểm tra database."}
+            </p>
+          )
+        ) : null}
+        {state?.columns ? (
+          state.dbOk ? (
+            <p className="inline-flex items-center gap-1.5 text-[.82rem] font-bold text-mint">
+              <Check className="h-4 w-4" /> DB đủ cột: owner_note · price · price_label → lưu review & đồng bộ giá OK
+            </p>
+          ) : (
+            <p className="text-[.82rem] font-bold text-amber-600 dark:text-amber-400">
+              ⚠ DB thiếu cột:{" "}
+              {["owner_note", "price", "price_label"].filter((c) => !state.columns?.[c]).join(" · ")} — mở Supabase →
+              SQL Editor → dán file <b>database/OWNER-NOTE.sql</b> → RUN → bấm Kiểm tra lại. (Đây chính là nguyên nhân
+              lỗi “Không thể cập nhật”.)
             </p>
           )
         ) : null}

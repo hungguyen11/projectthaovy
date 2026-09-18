@@ -1,16 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { Eraser, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eraser, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useApp } from "@/components/providers/AppProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
+import { api, ApiError } from "@/lib/api-client";
+
+/** Bộ danh mục skincare theo chu trình ngày/đêm — Admin bấm một cái là đủ,
+ *  KHÔNG tự gieo từ app hay DB trigger (danh mục trống không có ý nghĩa gì). */
+const SKINCARE_SET = [
+  "Tẩy trang",
+  "Sữa rửa mặt",
+  "Toner (nước cân bằng)",
+  "Tẩy tế bào chết (1-2 lần/tuần)",
+  "Serum (tinh chất)",
+  "Đặc trị (mụn / lão hóa)",
+  "Kem dưỡng ẩm",
+  "Kem chống nắng",
+];
 
 export default function CategoriesPage() {
-  const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen, isAdmin } = useApp();
+  const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen, isAdmin, refreshAll } = useApp();
   const confirm = useConfirm();
   const toast = useToast();
   const [editing, setEditing] = useState<{ id: string; name: string } | null>(null);
@@ -18,9 +32,30 @@ export default function CategoriesPage() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [cleaning, setCleaning] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   const countOf = (id: string) => products.filter((p) => p.category_id === id).length;
   const empties = categories.filter((c) => countOf(c.id) === 0);
+
+  const seedSkincare = async () => {
+    setSeeding(true);
+    let added = 0;
+    let existed = 0;
+    let failed = 0;
+    for (const n of SKINCARE_SET) {
+      try {
+        await api("/api/categories", { method: "POST", body: { name: n } });
+        added++;
+      } catch (e) {
+        if (e instanceof ApiError && (e.status === 409 || e.code === "DUPLICATE")) existed++;
+        else failed++;
+      }
+    }
+    await refreshAll();
+    setSeeding(false);
+    if (added > 0) toast("ok", "Đã thêm bộ danh mục Skincare", `${added} danh mục mới${existed ? ` · ${existed} đã có trước` : ""}. Đã gắn xong — vào sản phẩm, chọn danh mục và câu review sẽ gợi ý đúng chu trình.`);
+    else toast("info", "Không có gì mới", existed === SKINCARE_SET.length ? "Cả 8 danh mục skincare đã có sẵn trong list rồi." : `Đã có ${existed}/8 · ${failed} món không thêm được, thử lại sau.`);
+  };
 
   const cleanEmpties = async () => {
     const ok = await confirm({
@@ -62,6 +97,9 @@ export default function CategoriesPage() {
               <Eraser className="h-4 w-4" /> Dọn {empties.length} danh mục trống
             </Button>
           ) : null}
+          <Button variant="ghost" onClick={() => void seedSkincare()} loading={seeding}>
+            <Sparkles className="h-4 w-4" /> Bộ Skincare (8)
+          </Button>
           <Button onClick={() => { setEditing(null); setName(""); setCreating(true); }}>
             <Plus className="h-4 w-4" /> Thêm danh mục
           </Button>
