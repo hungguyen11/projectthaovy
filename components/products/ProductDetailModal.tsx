@@ -84,7 +84,11 @@ export function ProductDetailModal() {
           }}
           onNote={async (v) => {
             const res = await patchProduct(p.id, { owner_note: v });
-            if (res) setDetailProduct(res);
+            if (res) {
+              setDetailProduct(res);
+              return true;
+            }
+            return false;
           }}
         />
       ) : null}
@@ -101,7 +105,7 @@ function DetailBody({
   product: Product;
   onStatus: (s: ProductStatus) => void;
   onCategory: (id: string | null) => void | Promise<void>;
-  onNote: (v: string | null) => void | Promise<void>;
+  onNote: (v: string | null) => boolean | Promise<boolean>;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
   const { categories } = useApp();
@@ -229,11 +233,12 @@ function ReviewEditor({
   onNote,
 }: {
   product: Product;
-  onNote: (v: string | null) => void | Promise<void>;
+  onNote: (v: string | null) => boolean | Promise<boolean>;
 }) {
   const [txt, setTxt] = useState(product.owner_note ?? "");
   const [busy, setBusy] = useState(false);
   const [variant, setVariant] = useState(0);
+  const [saveState, setSaveState] = useState<"idle" | "ok" | "err">("idle");
   const dirty = txt !== (product.owner_note ?? "");
   return (
     <>
@@ -271,13 +276,25 @@ function ReviewEditor({
           disabled={!dirty || busy}
           onClick={async () => {
             setBusy(true);
-            await onNote(txt.trim() ? txt.trim().slice(0, 240) : null);
+            const ok = await onNote(txt.trim() ? txt.trim().slice(0, 240) : null);
+            setSaveState(ok ? "ok" : "err");
             setBusy(false);
           }}
         >
           Lưu review
         </Button>
       </div>
+      {saveState === "err" ? (
+        <p className="mt-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-[.78rem] font-bold leading-snug text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-200">
+          Chưa lưu được — khả năng cao database thiếu cột chứa review. Bấm <b>“Chép lệnh SQL”</b> ở banner phía trên
+          trang (hoặc Cài đặt → Kiểm tra ngay), dán vào Supabase → RUN, rồi quay lại bấm <b>Lưu lại</b>. Chữ bạn
+          đánh vẫn còn nguyên, không mất.
+        </p>
+      ) : saveState === "ok" ? (
+        <p className="mt-2 inline-flex items-center gap-1 text-[.76rem] font-bold text-mint">
+          <CheckCircle2 className="h-3.5 w-3.5" /> Đã lưu — người xem bấm vào tên sản phẩm là thấy ngay.
+        </p>
+      ) : null}
     </>
   );
 }

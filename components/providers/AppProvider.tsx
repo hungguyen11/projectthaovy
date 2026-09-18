@@ -11,11 +11,26 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { ApiError, api } from "@/lib/api-client";
 import { useToast } from "@/components/providers/ToastProvider";
 import type { Category, ExtractedMeta, Product, ProductStatus, Profile } from "@/types";
+
+/** Bộ danh mục skincare theo chu trình ngày/đêm của chủ list.
+ *  CHỈ Admin mới gieo được (khi đăng nhập, 1 lần per máy — hoặc bấm nút ở trang Danh mục).
+ *  Không auto-seed cho khách, không đụng DB trigger. */
+export const SKINCARE_SET = [
+  "Tẩy trang",
+  "Sữa rửa mặt",
+  "Toner (nước cân bằng)",
+  "Tẩy tế bào chết (1-2 lần/tuần)",
+  "Serum (tinh chất)",
+  "Đặc trị (mụn / lão hóa)",
+  "Kem dưỡng ẩm",
+  "Kem chống nắng",
+];
 
 export interface NewProductInput {
   source_url: string;
@@ -57,6 +72,10 @@ interface AppCtx {
   /** pop-up "chủ list mách" cho NGƯỜI XEM khi bấm vào tên sản phẩm */
   reviewProduct: Product | null;
   setReviewProduct: (p: Product | null) => void;
+
+  /** kết quả tự kiểm tra hạ tầng (chỉ Admin): cột DB + khách thấy bao nhiêu SP */
+  dbCheck: { dbOk: boolean; guestVisible: number; guestOk: boolean; columns: Record<string, boolean>; err?: string } | null;
+  recheckDb: () => Promise<void>;
 
   stats: { total: number; PENDING: number; PRIORITY: number; FAVORITE: number; PURCHASED: number };
 }
@@ -128,6 +147,56 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void refreshAll();
   }, [refreshAll]);
+
+  /* ── Admin: tự kiểm tra hạ tầng + gieo sẵn bộ danh mục Skincare ── */
+  const [dbCheck, setDbCheck] = useState<AppCtx["dbCheck"]>(null);
+  const checkedRef = useRef(false);
+  const seededRef = useRef(false);
+
+  const recheckDb = useCallback(async () => {
+    try {
+      const r = await api<{ dbOk: boolean; guestVisible: number; columns?: Record<string, boolean> }>("/api/admin/public-check");
+      setDbCheck({
+        dbOk: !!r.dbOk,
+        guestVisible: r.guestVisible ?? 0,
+        guestOk: (r.guestVisible ?? 0) > 0,
+        columns: r.columns ?? {},
+      });
+    } catch (e) {
+      setDbCheck((d) => ({ ...(d ?? { dbOk: false, guestVisible: 0, guestOk: false, columns: {} }), err: e instanceof ApiError ? e.message : "Không kiểm tra được hạ tầng." }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAdmin || loading || checkedRef.current) return;
+    checkedRef.current = true;
+    void recheckDb();
+
+    // gieo 8 danh mục skincare ĐÚNG 1 LẦN per trình duyệt — server tự bỏ món trùng tên
+    let seen = true;
+    try {
+      seen = !!window.localStorage.getItem("tv-skincare-seed-v1");
+      if (!seen) window.localStorage.setItem("tv-skincare-seed-v1", "1");
+    } catch { /* private mode: vẫn gieo, chỉ là lần sau gieo lại (server chặn trùng, không hại gì) */ }
+    if (seen || seededRef.current) return;
+    seededRef.current = true;
+    void (async () => {
+      const names = categories.length ? SKINCARE_SET.filter((n) => !categories.some((c) => c.name.trim().toLowerCase() === n.toLowerCase())) : SKINCARE_SET;
+      if (!names.length) return;
+      let added = 0;
+      for (const n of names) {
+        try {
+          await api("/api/categories", { method: "POST", body: { name: n } });
+          added++;
+        } catch { /* trùng tên / lỗi lẻ → bỏ qua, lần đăng nhập sau thử tiếp */ }
+      }
+      if (added > 0) {
+        await refreshAll();
+        toast("ok", `Đã thêm sẵn ${added} danh mục Skincare`, "Giờ thêm sản phẩm nhớ chọn danh mục — câu review sẽ tự gợi ý đúng chu trình dưỡng da.");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, loading, refreshAll, recheckDb, toast]);
 
   /* ── mutations ── */
 
@@ -252,6 +321,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       isAdmin, guestFavs, toggleGuestFav,
       addOpen, setAddOpen, bulkOpen, setBulkOpen, detailProduct, setDetailProduct,
       reviewProduct, setReviewProduct, stats,
+      dbCheck, recheckDb,
     }),
     [
       profile, products, categories, loading, error,
@@ -260,6 +330,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createCategory, renameCategory, deleteCategory,
       isAdmin, guestFavs,
       addOpen, bulkOpen, detailProduct, reviewProduct, stats,
+      dbCheck, recheckDb,
     ]
   );
 

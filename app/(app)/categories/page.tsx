@@ -2,26 +2,13 @@
 
 import { useState } from "react";
 import { Eraser, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
-import { useApp } from "@/components/providers/AppProvider";
+import { useApp, SKINCARE_SET } from "@/components/providers/AppProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { api, ApiError } from "@/lib/api-client";
-
-/** Bộ danh mục skincare theo chu trình ngày/đêm — Admin bấm một cái là đủ,
- *  KHÔNG tự gieo từ app hay DB trigger (danh mục trống không có ý nghĩa gì). */
-const SKINCARE_SET = [
-  "Tẩy trang",
-  "Sữa rửa mặt",
-  "Toner (nước cân bằng)",
-  "Tẩy tế bào chết (1-2 lần/tuần)",
-  "Serum (tinh chất)",
-  "Đặc trị (mụn / lão hóa)",
-  "Kem dưỡng ẩm",
-  "Kem chống nắng",
-];
 
 export default function CategoriesPage() {
   const { categories, products, loading, createCategory, renameCategory, deleteCategory, setAddOpen, isAdmin, refreshAll } = useApp();
