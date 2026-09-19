@@ -7,15 +7,15 @@
  * Khi link không đọc được, chỉ cho phép thêm TÊN/ẢNH tùy chọn (không nhập giá).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertCircle, Lock, PencilLine, Plus, Search, Sparkles, TriangleAlert } from "lucide-react";
+import { AlertCircle, ChevronDown, ClipboardList, Lock, PencilLine, Plus, Search, Sparkles, TriangleAlert } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useApp } from "@/components/providers/AppProvider";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { api, ApiError } from "@/lib/api-client";
-import { extractFirstUrl } from "@/lib/metadata/link";
-import { MARKETPLACE_META, FALLBACK_IMAGE } from "@/lib/config";
+import { extractFirstUrl, parseClipboardProduct } from "@/lib/metadata/link";
+import { detectMarketplace, MARKETPLACE_META, FALLBACK_IMAGE } from "@/lib/config";
 import { CATEGORY_GROUPS, defaultReviewFor, draftOwnerNote } from "@/lib/review-gen";
 import { cn, formatVnd, proxiedImg } from "@/lib/utils";
 import type { ExtractedMeta, ProductStatus } from "@/types";
@@ -38,6 +38,13 @@ export function AddProductModal() {
   const [noteVar, setNoteVar] = useState(0);
   const [noteTouched, setNoteTouched] = useState(false); // admin tự sửa rồi → không điền đè nữa
   const catNameOf = (id: string) => categories.find((c) => c.id === id)?.name ?? null;
+  const [pasteOpen, setPasteOpen] = useState(false); // bảng "dán nội dung trang" khi sàn bắt đăng nhập
+  const [clip, setClip] = useState("");
+  const [clipErr, setClipErr] = useState("");
+
+  useEffect(() => {
+    if (phase === "error" && !meta) setPasteOpen(true); // tự mở lối dán khi lấy tự động fail
+  }, [phase, meta]);
   const [saving, setSaving] = useState(false);
   const fetchId = useRef(0);
 
@@ -53,6 +60,9 @@ export function AddProductModal() {
     setNote("");
     setNoteVar(0);
     setNoteTouched(false);
+    setPasteOpen(false);
+    setClip("");
+    setClipErr("");
     setSaving(false);
   }, []);
 
@@ -100,6 +110,31 @@ export function AddProductModal() {
     fetchId.current += 1; // vô hiệu hóa kết quả fetch đang chạy
     setPhase("error");
     setErrMsg("Bạn đã dừng lấy thông tin. Vẫn lưu được bình thường — link được giữ để mở lại sau.");
+  };
+
+  // Độn an toàn: sàn bắt đăng nhập → admin dán nguyên nội dung trang đã copy (Ctrl+A/Ctrl+C),
+  // web đọc TÊN + GIÁ thật từ chữ của sàn — không bịa số.
+  const applyClip = () => {
+    const r = parseClipboardProduct(clip);
+    if (!r.title && r.price == null && !r.image) {
+      setClipErr("Chưa nhận ra tên/giá — mở đúng TRANG SẢN PHẨM trên sàn, bấm Ctrl+A (bôi đen cả trang) → Ctrl+C → dán hết vào đây rồi bấm lại.");
+      return;
+    }
+    const real = (extractFirstUrl(url) || url).trim();
+    setMeta({
+      title: r.title || "Sản phẩm (điền thêm tên)",
+      image: r.image,
+      price: r.price,
+      price_label: r.priceLabel,
+      marketplace: detectMarketplace(real),
+      source_url: real,
+    });
+    setPhase("done");
+    setErrMsg("");
+    setClipErr("");
+    setPasteOpen(false);
+    setClip("");
+    setNote((n) => n || draftOwnerNote({ title: r.title, category: catNameOf(categoryId), priceLabel: r.priceLabel }));
   };
 
   const manualImgUrl = manualImage.trim().startsWith("http") ? manualImage.trim() : null;
@@ -205,6 +240,46 @@ export function AddProductModal() {
         <TriangleAlert className="h-3.5 w-3.5 flex-none" />
         Ảnh · tên · giá (nếu lấy được) hiển thị tự động. Không có giá thì vẫn lưu bình thường.
       </p>
+
+      {phase !== "done" ? (
+        <div className="mt-2.5 rounded-xl border border-line bg-surface/70 p-2.5">
+          <button
+            type="button"
+            onClick={() => setPasteOpen((v) => !v)}
+            aria-expanded={pasteOpen}
+            className="flex w-full items-center gap-1.5 text-left text-[.8rem] font-extrabold text-ink"
+          >
+            <ClipboardList className="h-4 w-4 flex-none text-teal-deep" />
+            Sàn bắt đăng nhập, lấy tự động không được? Dán nội dung trang — web điền giúp tên + giá
+            <ChevronDown className={cn("ml-auto h-4 w-4 flex-none text-muted transition-transform", pasteOpen && "rotate-180")} />
+          </button>
+          {pasteOpen ? (
+            <div className="fade-in mt-2 space-y-2">
+              <p className="text-[.74rem] leading-snug text-muted">
+                Bước 1: mở link sản phẩm (đăng nhập Shopee/TikTok bình thường). Bước 2: trên trang đó bấm{" "}
+                <b>Ctrl+A → Ctrl+C</b> (điện thoại: giữ vào chữ → Chọn tất cả → Sao chép). Bước 3: quay lại đây,{" "}
+                <b>Ctrl+V</b> vào ô dưới rồi bấm <b>Điền thông tin</b>. Web chỉ đọc chữ có thật trên trang — không bịa.
+              </p>
+              <textarea
+                className="input-field min-h-[88px] resize-y font-mono text-[.74rem] leading-snug"
+                value={clip}
+                onChange={(e) => {
+                  setClip(e.target.value);
+                  if (clipErr) setClipErr("");
+                }}
+                placeholder="Dán nội dung trang vào đây — dán càng đủ (từ đầu trang tới chỗ hiển thị giá) càng chính xác"
+                aria-label="Nội dung trang sản phẩm đã copy"
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" variant="soft" onClick={applyClip} disabled={!clip.trim()}>
+                  <Sparkles className="h-3.5 w-3.5" /> Điền thông tin
+                </Button>
+                {clipErr ? <p className="text-[.74rem] font-bold text-amber-700 dark:text-amber-300">{clipErr}</p> : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {phase === "loading" && !meta ? (
         <div className="mt-4 flex gap-4">

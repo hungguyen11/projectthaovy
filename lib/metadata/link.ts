@@ -114,3 +114,87 @@ export function parseTiki(u: URL): { itemId: string } | null {
   const sku = m?.[1] || u.searchParams.get("sku") || "";
   return sku ? { itemId: sku } : null;
 }
+
+/* ══════════ ĐỘN GỪNG KHI SÀN BẮT ĐĂNG NHẬP (chặn mọi server trên đời) ══════════
+ * Admin MỞ trang sản phẩm bằng trình duyệt của mình (đã đăng nhập) → Ctrl+A → Ctrl+C
+ * → dán vào web. Web chỉ CHỮA LIỆU ĐỌC từ chính nội dung sàn — không bịa gì. */
+export interface ClipboardProduct {
+  title: string | null;
+  price: number | null;
+  priceLabel: string | null;
+  image: string | null;
+}
+
+const CLIP_JUNK =
+  /^(https?:\/\/|\/|m\.shopee|tải app|đăng nhập|đăng ký|quét mã|trở thành|danh mục|tìm kiếm|chat với shop|theo dõi|bản quyền|©|điều khoản|trợ giúp|giỏ hàng|flash sale|săn deal|shopee vip|voucher|freeship|sản phẩm tương tự|có thể bạn thích|đánh giá|thông tin shop|đơn hàng|bán chạy nhất|danh hiệu)/i;
+const PRICE_RE = /(\d{1,3}(?:\.\d{3})+)\s*[đ₫]/g;
+
+export function parseClipboardProduct(text: string): ClipboardProduct {
+  const raw = String(text || "").replace(/\r/g, "");
+  const out: ClipboardProduct = { title: null, price: null, priceLabel: null, image: null };
+  const trimmed = raw.trim();
+
+  // dạng JSON từ DevTools copy() — {title, image, price|price:{min,max}} (đơn vị đ hoặc ×100.000)
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    try {
+      const j = JSON.parse(trimmed) as Record<string, unknown>;
+      if (typeof j.title === "string" && j.title.trim()) out.title = j.title.replace(/\s+/g, " ").trim().slice(0, 500);
+      if (typeof j.image === "string" && /^https?:/i.test(j.image)) out.image = j.image;
+      let p: number | null = null;
+      if (typeof j.price === "number" && Number.isFinite(j.price)) p = j.price;
+      else if (j.price && typeof j.price === "object") {
+        const pr = j.price as Record<string, unknown>;
+        const hi = Number(pr.max ?? pr.min ?? 0);
+        if (Number.isFinite(hi) && hi > 0) p = hi;
+      }
+      if (p != null) {
+        if (p > 100_000_000) p = Math.round(p / 100_000); // dạng nội bộ ×100.000 của sàn (mọi món thật đều >1e8 theo đơn vị này)
+        out.price = p;
+        out.priceLabel = `${p.toLocaleString("vi-VN")}đ`;
+      }
+      return out;
+    } catch {
+      /* không phải JSON — đọc như text thường */
+    }
+  }
+
+  const lines = trimmed.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  // TÊN: dòng chữ "ra chữ" đầu tiên, đủ dài, không phải menu/rác của sàn
+  for (const l of lines.slice(0, 90)) {
+    if (l.length < 12 || l.length > 320) continue;
+    if (CLIP_JUNK.test(l)) continue;
+    const letters = (l.match(/[A-Za-zÀ-ỹ]/g) || []).length;
+    if (letters < 8 || letters < l.length * 0.35) continue;
+    const cleaned = l.replace(/^["'"“”]+\s*/, "").replace(/\s*["'"“”]+$/, "").trim();
+    if (cleaned.length >= 12) {
+      out.title = cleaned.slice(0, 500);
+      break;
+    }
+  }
+
+  // GIÁ: dòng "Ađ - Bđ" (khoảng giá variant) → lấy CAO NHẤT; không có range → giá bán đầu tiên
+  const head = lines.slice(0, 60).join("\n");
+  const rangeM = head.match(/(\d{1,3}(?:\.\d{3})+)\s*[đ₫]\s*[-–]\s*(\d{1,3}(?:\.\d{3})+)\s*[đ₫]/);
+  if (rangeM) {
+    const lo = Number(rangeM[1].replace(/\./g, ""));
+    const hi = Number(rangeM[2].replace(/\./g, ""));
+    out.price = Math.max(lo, hi);
+    out.priceLabel = `${lo.toLocaleString("vi-VN")}đ - ${hi.toLocaleString("vi-VN")}đ`;
+  } else {
+    PRICE_RE.lastIndex = 0;
+    const m = head.match(/(?:^|\s|[^\d.,])(\d{1,3}(?:\.\d{3})+)\s*[đ₫](?!\d)/); // giá bán hiển thị đầu tiên
+    if (m) {
+      const v = Number(m[1].replace(/\./g, ""));
+      if (Number.isFinite(v) && v > 0) {
+        out.price = v;
+        out.priceLabel = `${v.toLocaleString("vi-VN")}đ`;
+      }
+    }
+  }
+
+  // ảnh (nếu trong trang có URL ảnh hiện sẵn khi copy)
+  const im = trimmed.match(/https?:\/\/[^\s"'\\]+susercontent[^\s"'\\]*/i) || trimmed.match(/https?:\/\/[^\s"'\\]+\.(?:jpg|jpeg|png|webp)[^\s"'\\]*/i);
+  if (im) out.image = im[0];
+  return out;
+}
