@@ -17,7 +17,7 @@ import { api, ApiError } from "@/lib/api-client";
 import { extractFirstUrl } from "@/lib/metadata/link";
 import { MARKETPLACE_META, FALLBACK_IMAGE } from "@/lib/config";
 import { CATEGORY_GROUPS, defaultReviewFor, draftOwnerNote } from "@/lib/review-gen";
-import { cn, formatVnd } from "@/lib/utils";
+import { cn, formatVnd, proxiedImg } from "@/lib/utils";
 import type { ExtractedMeta, ProductStatus } from "@/types";
 
 type Phase = "idle" | "loading" | "done" | "error";
@@ -218,7 +218,7 @@ export function AddProductModal() {
       ) : null}
 
       {phase === "error" && !meta ? (
-        <div className="mt-3 rounded-xl bg-rose-soft px-3.5 py-2.5 text-sm font-semibold text-red-600 dark:bg-red-950 dark:text-red-300">
+        <div className="mt-3 rounded-xl border border-amber-300/60 bg-amber-50 px-3.5 py-2.5 text-sm font-semibold text-amber-900 dark:border-amber-500/25 dark:bg-amber-950/40 dark:text-amber-200">
           <p className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 flex-none" />
             <span>{errMsg}</span>
@@ -259,7 +259,7 @@ export function AddProductModal() {
             <div className="relative h-28 w-full flex-none overflow-hidden rounded-xl border border-line bg-surface sm:w-36">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={meta.image || manualImgUrl || FALLBACK_IMAGE}
+                src={proxiedImg(meta.image || manualImgUrl) || FALLBACK_IMAGE}
                 alt=""
                 loading="lazy"
                 decoding="async"

@@ -18,6 +18,15 @@ export function parseVnd(input: string | number): number | null {
   return Number.isFinite(v) && v >= 0 ? v : null;
 }
 
+/** Ảnh sản phẩm luôn hiển thị qua /api/img (proxy + cache 24h) — tránh CDN của sàn
+ *  chặn hotlink khiến người xem thấy ô ảnh trống. Ảnh của chính app thì giữ nguyên. */
+export function proxiedImg(url?: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("/") || url.startsWith("data:") || url.includes("/api/img?")) return url;
+  if (!/^https?:\/\//i.test(url)) return url;
+  return `/api/img?u=${encodeURIComponent(url)}`;
+}
+
 /**
  * Nhập giá kiểu Việt Nam → số VND. Hỗ trợ:
  *  "399000" → 399000 · "399.000" → 399000 · "399k" → 399000

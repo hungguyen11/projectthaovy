@@ -4,7 +4,9 @@ import { fetchMetadata } from "@/lib/metadata/service";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs"; // cần node:dns cho SSRF guard
-export const maxDuration = 30; // trang sàn chậm + vòng tìm giá dự phòng — cần qtime này trên Vercel
+// Engine có nhiều tầng (fetch + state + thử lại mobile + SERP) — ngân sách 45s,
+// bản thân fetchMetadata tự giới hạn 24s để KHÔNG BAO GIỜ bị Vercel chém 504.
+export const maxDuration = 45;
 
 /**
  * POST /api/metadata  { url }

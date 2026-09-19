@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check, Star, Heart, ExternalLink, Quote } from "lucide-react";
 import type { Product } from "@/types";
 import { MARKETPLACE_META, STATUS_META, FALLBACK_IMAGE } from "@/lib/config";
-import { cn, formatVnd } from "@/lib/utils";
+import { cn, formatVnd, proxiedImg } from "@/lib/utils";
 import { useApp } from "@/components/providers/AppProvider";
 
 /**
@@ -40,7 +40,7 @@ export function ProductCard({ product, index = 0, compact = false }: { product: 
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-aqua-soft">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={product.image_url || FALLBACK_IMAGE}
+          src={proxiedImg(product.image_url) || FALLBACK_IMAGE}
           alt={product.product_name}
           loading="lazy"
           decoding="async"

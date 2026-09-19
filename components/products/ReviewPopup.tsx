@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { useApp } from "@/components/providers/AppProvider";
 import { FALLBACK_IMAGE } from "@/lib/config";
 import { draftCatchphrase } from "@/lib/review-gen";
-import { cn, formatVnd } from "@/lib/utils";
+import { cn, formatVnd, proxiedImg } from "@/lib/utils";
 
 const BADGE_BY_STATUS: Record<string, { label: string; icon: typeof Star; cls: string }> = {
   FAVORITE: { label: "Được yêu thích", icon: Flame, cls: "bg-gradient-to-r from-cyan-400 to-sky-500" },
@@ -56,7 +56,7 @@ export function ReviewPopup() {
           <div className="rp-rise relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-cyan-50 dark:bg-cyan-950/40" style={{ animationDelay: "40ms" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imgFailed || !p.image_url ? FALLBACK_IMAGE : p.image_url}
+              src={imgFailed || !p.image_url ? FALLBACK_IMAGE : (proxiedImg(p.image_url) ?? FALLBACK_IMAGE)}
               alt=""
               referrerPolicy="no-referrer"
               loading="lazy"

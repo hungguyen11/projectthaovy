@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useApp } from "@/components/providers/AppProvider";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { FALLBACK_IMAGE, MARKETPLACE_META, STATUS_META } from "@/lib/config";
-import { cn, formatVnd } from "@/lib/utils";
+import { cn, formatVnd, proxiedImg } from "@/lib/utils";
 import type { Product, ProductStatus } from "@/types";
 
 /**
@@ -125,7 +125,7 @@ function DetailBody({
       <div className="relative aspect-square w-full overflow-hidden rounded-[18px] border border-line bg-aqua-soft md:max-w-[250px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={imgFailed || !p.image_url ? FALLBACK_IMAGE : p.image_url}
+          src={imgFailed || !p.image_url ? FALLBACK_IMAGE : (proxiedImg(p.image_url) ?? FALLBACK_IMAGE)}
           alt={p.product_name}
           referrerPolicy="no-referrer"
           loading="lazy"

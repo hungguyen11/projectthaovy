@@ -19,6 +19,7 @@ import type { ExtractedMeta } from "@/types";
 
 const PAGE_TIMEOUT_MS = 9_000;
 const SERP_TIMEOUT_MS = 7_000;
+const HARD_BUDGET_MS = 24_000; // mọi tầng phải xong trong 24s → luôn trả kết quả trước maxDuration
 const MAX_BYTES = 1_500_000;
 const MAX_REDIRECTS = 4;
 const CACHE_TTL_MS = 5 * 60_000;
@@ -26,9 +27,11 @@ const CACHE_MAX = 200;
 
 const PAGE_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 ProjectThaoVy/1.0";
+const MOBILE_UA =
+  "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1";
 
 /** tiêu đề rác từ trang SPA/SEO của sàn — bỏ qua, đi tìm nguồn khác */
-const JUNK_TITLE = /^(shopping cart icon|shopee(\s*việt\s*nam)?|tiktok(\s*shop)?|lazada|tiki|loading|404|error|just a moment|verify (you?|are)|access denied|security check|mkt single page application)\.?$/i;
+const JUNK_TITLE = /^(shopping cart icon|shopee(\s*việt\s*nam)?|tiktok(\s*shop)?|tiktok\s*[-–—]\s*make your day|lazada|tiki|loading|404|error|just a moment|verify (you?|are)|access denied|security check|mkt single page application)\.?$/i;
 const JUNK_INFIX = /(mua và bán trên ứng dụng|single page application|miễn phí vận chuyển|đủ loại|khuyến mãi lớn|flash sale|đang tải|access denied|just a moment)/i;
 
 function decodeEntities(s: string): string {
@@ -46,6 +49,47 @@ function usableTitle(t: string | null | undefined): string | null {
   const s = decodeEntities(t);
   if (s.length < 5 || JUNK_TITLE.test(s) || JUNK_INFIX.test(s)) return null;
   return s.slice(0, 180);
+}
+
+/** ảnh rác (favicon/icon thương hiệu) — không phải ảnh sản phẩm → bỏ, đi tìm nguồn khác */
+function usableImage(u: string | null): string | null {
+  if (!u || !/^https?:/i.test(u)) return null;
+  if (/favicon|\.ico($|\?)|logo[-_.]|\bicon\b|shopee-mobile|deo\.shopeemobile/i.test(u)) return null;
+  return u;
+}
+
+/** Trang trung gian của link rút gọn Shopee thường CHỨA SẴN link thật (dạng mã hóa
+ *  %3A%2F%2F) trong body — đào ra để đi tiếp, kể cả khi sàn không chịu redirect. */
+function extractProductTarget(html: string): URL | null {
+  if (!html) return null;
+  for (const m of html.matchAll(/https(?:%3A(?:%2F%2F){1,2}|:\/\/)[^"'\\\s<>)]+/gi)) {
+    let cand = m[0];
+    try {
+      cand = decodeURIComponent(cand);
+    } catch {
+      /* giữ nguyên */
+    }
+    if (!/^https?:\/\/([^/]*\.)?shopee\.[a-z.]{2,6}\//i.test(cand)) continue;
+    let u: URL;
+    try {
+      u = new URL(cand);
+    } catch {
+      continue;
+    }
+    if (isShortLink(u)) continue;
+    if (parseShopee(u)) return u;
+  }
+  return null;
+}
+
+/** Quét ID ảnh susercontent trong MỌI ngóc ngách HTML (kể cả JSON escape \u002f, \/) */
+function harvestShopeeImage(html: string): string | null {
+  const m = html.match(/(?:https?:\\?\/\\?\/)?(?:down-vn|down-sv|image-sg|[a-z]{2}-\d{6,}-.)?[^"\\]*?((?:vn|sg|th|my|ph|id|tw)-\d{6,}[-_]\w{4,}[-_][a-zA-Z0-9]{20,}[a-zA-Z0-9])/);
+  if (m) {
+    const id = m[1].replace(/\\/g, "");
+    if (/^(vn|sg|th|my|ph|id|tw)-\d{6,}/.test(id)) return `https://down-vn.img.susercontent.com/file/${id}`;
+  }
+  return null;
 }
 
 export type MetadataResult =
@@ -95,11 +139,12 @@ async function readBodyLimited(res: Response): Promise<string> {
 }
 
 const FALLBACK_ERROR =
-  "Không nhận ra sản phẩm từ link này. Trên app sàn: bấm Chia sẻ → Sao chép liên kết rồi dán lại. Hoặc mở link, tự nhập tên + giá (vẫn lưu đủ, vẫn bấm Mua ngay được).";
+  "Sàn đang chặn truy cập tự động với trang này (web đã tự thử lại 2 lượt). Vẫn lưu bình thường: bấm “Lưu sản phẩm”, tên/ảnh có thể điền tay; hoặc mở app Shopee/TikTok → Chia sẻ → Sao chép liên kết → dán lại để Lấy thông tin lần nữa.";
 
 async function fetchPage(
   startUrl: URL,
-  timeoutMs: number
+  timeoutMs: number,
+  ua: string = PAGE_UA
 ): Promise<{ visited: URL; html: string | null; status: number; aborted?: boolean; err?: string }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -112,7 +157,7 @@ async function fetchPage(
         redirect: "manual",
         signal: controller.signal,
         headers: {
-          "User-Agent": PAGE_UA,
+          "User-Agent": ua,
           Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
           "Accept-Language": "vi,en;q=0.8",
           Referer: visited.origin + "/",
@@ -154,7 +199,89 @@ function slugWords(slug: string): string {
   return slug.replace(/[-_+.]/g, " ").replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Cửa dữ liệu tốt nhất cho link /product/<shop>/<item> KHÔNG có slug (dạng chị hay dán
+ * từ thanh địa chỉ): chính API nội bộ PDP mà trang sản phẩm Shopee dùng — get_pc không
+ * cần session. Lấy được TÊN + ẢNH + GIÁ (giá ~×100.000; khoảng → lấy CAO NHẤT, spec).
+ * Fail im lặng (403/timeout) → pipeline còn SERP + manual, không sập.
+ */
+interface PdpApi {
+  title: string | null;
+  image: string | null;
+  price: number | null;
+  priceLabel: string | null;
+}
+async function tryShopeePdpApi(host: string, shopId: string, itemId: string, timeoutMs: number): Promise<PdpApi | null> {
+  if (!/^\d+$/.test(shopId) || !/^\d+$/.test(itemId)) return null;
+  const url = `https://${host}/api/v4/pdp/get_pc?item_id=${itemId}&shop_id=${shopId}&detail_level=0`;
+  let safe: URL;
+  try {
+    safe = validateUrl(url).url;
+    await assertPublicDns(safe.hostname);
+  } catch {
+    return null;
+  }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), Math.max(800, timeoutMs));
+  try {
+    const res = await fetch(safe.toString(), {
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": PAGE_UA,
+        Accept: "application/json",
+        "Accept-Language": "vi,en;q=0.8",
+        Referer: `https://${host}/product/${shopId}/${itemId}`,
+      },
+    });
+    if (!res.ok) return null;
+    const text = (await res.text()).slice(0, 400_000);
+    if (!text.trimStart().startsWith("{")) return null;
+    const j = JSON.parse(text) as Record<string, unknown>;
+    const d = (j.data ?? j) as Record<string, unknown>;
+    let item: Record<string, unknown> | null = null;
+    const di = d.item as Record<string, unknown> | undefined;
+    if (di && (di.title || di.name)) item = di;
+    if (!item && Array.isArray(d.components)) {
+      for (const c of d.components as Array<Record<string, unknown>>) {
+        const md = (c.mod_data ?? c.modData) as Record<string, unknown> | undefined;
+        const prod = md?.item as Record<string, unknown> | undefined;
+        if (prod && (prod.title || prod.name)) {
+          item = prod;
+          break;
+        }
+      }
+    }
+    if (!item) return null;
+    const rawTitle = typeof item.title === "string" ? item.title : typeof item.name === "string" ? item.name : "";
+    const title = usableTitle(rawTitle);
+    let image: string | null = null;
+    const rawImg = (typeof item.image_normal === "string" && item.image_normal) || (typeof item.image === "string" && item.image) || null;
+    const pickImg = (v: string) =>
+      usableImage(/^https?:/i.test(v) ? v : `https://down-vn.img.susercontent.com/file/${v.replace(/\\/g, "")}`);
+    if (rawImg) image = pickImg(rawImg as string);
+    if (!image && Array.isArray(item.images) && item.images.length) {
+      const first = item.images[0];
+      if (typeof first === "string" && first) image = pickImg(first);
+    }
+    let price: number | null = null;
+    let priceLabel: string | null = null;
+    const p = item.price as Record<string, unknown> | undefined;
+    const hi = Number(p?.max ?? p?.min ?? item.price_max ?? item.price_min ?? 0);
+    if (Number.isFinite(hi) && hi > 100_000) {
+      price = Math.round(hi / 100_000); // sàn trả giá ×100.000; range → CAO NHẤT (đúng spec giá)
+      priceLabel = `${price.toLocaleString("vi-VN")}đ`;
+    }
+    return title || image || price != null ? { title, image, price, priceLabel } : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
+  const t0 = Date.now();
+  const remain = () => HARD_BUDGET_MS - (Date.now() - t0); // ngân sách cứng — luôn trả kết quả TRƯỚC khi serverless bị chém
   const candidate = extractFirstUrl(rawUrl) || String(rawUrl || "").trim();
   let finalUrl: URL;
   try {
@@ -168,15 +295,12 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
   if (cached) return { ...cached, source: "cache" } as MetadataResult;
 
   const marketplace = detectMarketplace(finalUrl.toString());
-  const page = await fetchPage(finalUrl, PAGE_TIMEOUT_MS);
+  const page = await fetchPage(finalUrl, Math.min(PAGE_TIMEOUT_MS, Math.max(2_500, remain())));
   if (page.err === "SSRF") return fail("SSRF_BLOCKED", "Đường dẫn bị chặn bởi bộ lọc an toàn.");
-  if (page.aborted) {
-    // trang treo? vẫn còn cửa SERP bên dưới khi nhận diện được sàn
-  } else if (page.status === 404) {
-    // tiếp tục — có thể SERP/​slug cứu được
-  } else if (page.status >= 400 && page.status !== 0) {
-    // sàn chặn (403/429…) — không bỏ cuộc, đi SERP
-  }
+  // link dẫn tới trang "sản phẩm không tồn tại" của sàn → báo ĐÚNG bệnh, đừng chung chung
+  const landed = page.visited.href || "";
+  const dead =
+    page.status === 404 || page.status === 410 || /error_page|item[_-]?not[_-]?found|product[_-]?not[_-]?exist/i.test(landed);
 
   let parsed: Partial<ParsedMeta> = {};
   if (page.html) {
@@ -187,11 +311,11 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
     }
   }
   let title = usableTitle(parsed.title);
-  let image = parsed.image || null;
+  let image = usableImage(parsed.image || null);
   let price = parsed.price ?? null;
   let priceLabel = parsed.price_label || null;
 
-  const shopee = marketplace === "SHOPEE" ? parseShopee(page.visited) : null;
+  let shopee = marketplace === "SHOPEE" ? parseShopee(page.visited) : null;
   const tiktok = marketplace === "TIKTOK_SHOP" ? parseTikTok(page.visited) : null;
 
   // Shopee: slug trong URL chính là tên sản phẩm do sàn tự đặt — chuẩn hơn mọi suy đoán.
@@ -202,9 +326,11 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
   // đọc được từ mọi server (không qua API, không qua SERP).
   if (shopee?.shopId && shopee?.itemId && (!title || !image)) {
     let stateHtml: string | null = page.html && page.html.includes("PDP_BFF_DATA") ? page.html : null;
-    if (!stateHtml) {
+    if (!stateHtml && remain() > 3_500) {
       const host = /^(\d+\.)?(s|mall)\./.test(page.visited.hostname) || page.visited.hostname === "shopee.vn" ? "shopee.vn" : page.visited.hostname;
-      const canon = await fetchPage(new URL(`https://${host}/product/${shopee.shopId}/${shopee.itemId}`), PAGE_TIMEOUT_MS);
+      const canonUrl = new URL(`https://${host}/product/${shopee.shopId}/${shopee.itemId}`);
+      let canon = await fetchPage(canonUrl, Math.min(PAGE_TIMEOUT_MS, remain() - 1_200));
+      if (!canon.html && remain() > 2_800) canon = await fetchPage(canonUrl, Math.min(6_000, remain() - 1_200), MOBILE_UA);
       if (canon.html) stateHtml = canon.html;
     }
     if (stateHtml) {
@@ -219,12 +345,96 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
   }
 
   const words = slugTitle && shopee?.slug ? slugWords(shopee.slug) : "";
+
+  // ═══ TỰ THỬ LẦN 2 bằng trình duyệt điện thoại — nhiều pha 429/chợp chờ đều qua ở lần 2,
+  //     và nhiều ca "thiếu ảnh" là do lượt 1 rơi vào trang chặn không có og:image. ═══
+  let htmlExtra: string | null = null;
+  if ((marketplace === "SHOPEE" || marketplace === "TIKTOK_SHOP") && (!title || !image || (price == null && !priceLabel)) && remain() > 3_500) {
+    const page2 = await fetchPage(finalUrl, Math.min(11_000, remain() - 1_500), MOBILE_UA);
+    // shortlink bị chặn ở lượt 1 nhưng lượt 2 mở ra trang thật → lấy shop/item ID từ đó mà đi tiếp
+    if (!shopee && marketplace === "SHOPEE" && page2.visited.hostname !== finalUrl.hostname) {
+      shopee = parseShopee(page2.visited);
+      if (!title && shopee?.slug) {
+        const st = usableTitle(titleFromSlug(shopee.slug));
+        if (st) title = st;
+      }
+    }
+    if (page2.html) {
+      htmlExtra = page2.html;
+      try {
+        const p2 = parseMetadata(page2.html, page2.visited.toString());
+        if (!title) title = usableTitle(p2.title);
+        if (!image) image = usableImage(p2.image || null);
+        if (price == null && p2.price != null) price = p2.price;
+        if (!priceLabel && p2.price_label) priceLabel = p2.price_label;
+      } catch { /* lượt 2 lỗi parse — bỏ, vẫn còn dữ liệu lượt 1 */ }
+      if (shopee?.shopId && shopee?.itemId && (!title || !image)) {
+        const st2 = parseShopeeState(page2.html, shopee.shopId, shopee.itemId);
+        if (st2) {
+          if (!title) title = usableTitle(st2.title);
+          if (!image && st2.image) image = st2.image;
+        }
+      }
+    }
+  }
+  // ═══ Shortlink kẹt ở trang chặn (sàn không redirect) → đào link thật khỏi body trang đó ═══
+  if (marketplace === "SHOPEE" && !shopee && isShortLink(finalUrl) && remain() > 4_000) {
+    const tgt = extractProductTarget(page.html || "") || extractProductTarget(htmlExtra || "");
+    if (tgt) {
+      try {
+        shopee = parseShopee(tgt);
+        const stT = shopee?.slug ? usableTitle(titleFromSlug(shopee.slug)) : null;
+        if (stT) title = title || stT;
+        if (shopee?.shopId && shopee?.itemId && remain() > 2_500) {
+          const deep = await fetchPage(new URL(`https://${shopee.host || "shopee.vn"}/product/${shopee.shopId}/${shopee.itemId}`), Math.min(9_000, remain() - 1_500));
+          const deepHtml = deep.html || htmlExtra;
+          if (deep.html) htmlExtra = deep.html;
+          if (deepHtml) {
+            try {
+              const p3 = parseMetadata(deepHtml, deep.visited.toString());
+              if (!title) title = usableTitle(p3.title);
+              if (!image) image = usableImage(p3.image || null);
+              if (price == null && p3.price != null) price = p3.price;
+              if (!priceLabel && p3.price_label) priceLabel = p3.price_label;
+            } catch { /* bỏ, còn các tầng sau */ }
+            if ((!title || !image) && shopee.shopId && shopee.itemId) {
+              const st3 = parseShopeeState(deepHtml, shopee.shopId, shopee.itemId);
+              if (st3) {
+                if (!title) title = usableTitle(st3.title);
+                if (!image && st3.image) image = st3.image;
+              }
+            }
+          }
+        }
+      } catch { /* trang chặn dị dạng — để SERP & lối nhập tay lo tiếp */ }
+    }
+  }
+
+  // Ảnh phương án chót: quét ID file susercontent rơi vãi trong HTML (link ảnh dựng lại hợp lệ 100%)
+  if (!image && marketplace === "SHOPEE") {
+    const anyHtml = [page.html, htmlExtra].find((h): h is string => !!h && h.length > 5000);
+    if (anyHtml) image = harvestShopeeImage(anyHtml);
+  }
+
+  // ═══ API nội bộ PDP của Shopee (get_pc) — cửa mạnh nhất cho link /product/shop/item ═══
+  if (shopee?.shopId && shopee?.itemId && remain() > 3_000 && (!title || !image || (price == null && !priceLabel))) {
+    const api = await tryShopeePdpApi(shopee.host || "shopee.vn", shopee.shopId, shopee.itemId, Math.min(3_000, remain() - 1_200));
+    if (api) {
+      if (!title && api.title) title = api.title;
+      if (!image && api.image) image = api.image;
+      if (price == null && !priceLabel && api.price != null) {
+        price = api.price;
+        priceLabel = api.priceLabel;
+      }
+    }
+  }
+
   const needTitle = !title;
   const needPrice = price == null && !priceLabel;
   const wantSerp = (marketplace === "SHOPEE" || marketplace === "TIKTOK_SHOP") && (needTitle || needPrice);
 
   if (wantSerp) {
-    const deadline = Date.now() + 9_000; // ngân sách chung cho tìm kiếm dự phòng
+    const deadline = Date.now() + Math.max(0, Math.min(9_000, remain() - 1_200)); // ngân sách SERP = phần còn lại của ví cứng
     const queries: string[] = [];
     if (shopee?.itemId) queries.push(`shopee "${shopee.itemId}"${shopee.shopId ? ` ${shopee.shopId}` : ""}`);
     if (words) queries.push(`site:shopee.vn "${words.slice(0, 80)}"`);
@@ -261,8 +471,15 @@ export async function fetchMetadata(rawUrl: string): Promise<MetadataResult> {
   const hasSomething = !!(title || image || price != null || priceLabel);
 
   if (!hasSomething) {
-    // link rút gọn chưa kịp mở? hoặc sai link — một lần nữa báo rõ cách xử lý
-    if (isShortLink(finalUrl)) return fail("SHORT_UNRESOLVED", "Link rút gọn không mở được tới trang sản phẩm — hãy dùng link đầy đủ trên thanh địa chỉ.");
+    // ĐÚNG bệnh: shortlink CHƯA mở được (vẫn đứng ở trang chặn) khác với đã vào tới trang
+    // sản phẩm mà sàn không chịu nhả dữ liệu (BLOCKED — 6 cửa đều đã thử).
+    if (isShortLink(finalUrl) && page.visited.hostname === finalUrl.hostname && !shopee)
+      return fail(
+        "SHORT_UNRESOLVED",
+        "Link rút gọn không mở được tới trang sản phẩm (đã thử 2 lượt). Mở link trên điện thoại → bấm Chia sẻ → Sao chép liên kết → dán link ĐẦY ĐỦ (bắt đầu bằng https://shopee.vn/... hoặc /product/...) rồi thử lại. Hoặc cứ bấm “Lưu sản phẩm” — link vẫn lưu và bấm Mua ngay được."
+      );
+    if (dead) return fail("DEAD_LINK", "Sàn trả về trang “sản phẩm không tồn tại” — món này có thể đã bị gỡ. Mở link trên điện thoại kiểm tra lại, hoặc lấy link mới rồi dán lại nhé.");
+    if (page.aborted) return fail("TIMEOUT", "Trang sàn phản hồi chậm (đã tự thử lại 2 lượt). Bấm “Lấy lại thông tin” lần nữa, hoặc cứ Lưu tay tên + giá — link vẫn dùng mua bình thường.");
     return fail(marketplace === "OTHER" ? "NO_DATA" : "BLOCKED", FALLBACK_ERROR);
   }
 
